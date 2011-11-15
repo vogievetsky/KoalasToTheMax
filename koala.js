@@ -23,11 +23,8 @@ function KttM(options) {
   options.onDone   = options.onDone   || function() {};
 
   var canvas = document.createElement('canvas').getContext('2d');
-  var x, y;
-  var size = 512,
-      minDiam = 4;
-
-  var dim  = size / minDiam;
+  var maxSize = 512,
+      minSize = 4;
 
   var colorHash;
   var leftToOpen = [];
@@ -52,88 +49,91 @@ function KttM(options) {
   // Create the SVG ellement
   var vis = d3.select(options.selector)
     .append("svg:svg")
-      .attr("width", size)
-      .attr("height", size);
+      .attr("width", maxSize)
+      .attr("height", maxSize);
 
   // Find out if all the circles have been oppened
   var doneCheckNeeded = false;
   var doneInterval = setInterval(function() {
     if (!doneCheckNeeded) return;
     doneCheckNeeded = false;
-    if (leftToOpen.length > 0) return;
+    return;
     options.onDone();
     clearInterval(doneInterval);
   }, 100);
 
-  function split(x, y, d) {
-    var classStr = 'c' + [x,y,d].join('_');
-    vis.select('circle.' + classStr).remove();
-    leftToOpen.splice(leftToOpen.indexOf(classStr), 1);
+  function split(d) {
+    if (d.removed || d.size <= minSize) return;
+    d.removed = true;
+    d3.select(this).remove();
 
-    addCircle(2*x,   2*y,   d+1);
-    addCircle(2*x+1, 2*y,   d+1);
-    addCircle(2*x,   2*y+1, d+1);
-    addCircle(2*x+1, 2*y+1, d+1);
+    var x2 = 2 * d.x;
+    var y2 = 2 * d.y;
+    var nextSize = d.size / 2;
+
+    addCircles([
+      { x: x2,   y: y2,   size: nextSize, parent: d },
+      { x: x2+1, y: y2,   size: nextSize, parent: d },
+      { x: x2,   y: y2+1, size: nextSize, parent: d },
+      { x: x2+1, y: y2+1, size: nextSize, parent: d }
+    ])
   }
 
-  function addCircle(x, y, d) {
-    var params = [x,y,d];
+  function addEvents(d) {
+    if (d.size > minSize) {
+      var circle = d3.select(this)
+        .on('mouseover', split)
+        .on('click', onCircleClick);
 
-    var unit = size / Math.pow(2,d);
-    var half = unit / 2;
-    var classStr = 'c'+params.join('_');
-
-    var circle = vis.append('svg:circle')
-      .attr('class', classStr);
-
-    leftToOpen.push(classStr);
-
-    function finish(circle) {
-      if (unit > minDiam) {
-        if (!circle) circle = d3.select(this);
-        circle
-          .on('mouseover', function() { split(x, y, d); })
-          .on('click', onCircleClick);
+      if (d.size === maxSize) {
+        circle.on('mousemove', split);
       }
-      doneCheckNeeded = true;
     }
+    doneCheckNeeded = true;
+  }
 
-    if (d > 0) {
-      var xOld = Math.floor(x / 2);
-      var yOld = Math.floor(y / 2);
-      var dOld = d - 1;
-      var unitOld = size / Math.pow(2, dOld);
-      var halfOld = unitOld / 2;
-      var clsOld = 'c'+[xOld,yOld,dOld].join('_');
+  function addCircles(circles, init) {
+    circles.forEach(function(d) {
+      d.color = 'rgb(' + colorHash[[d.x, d.y, d.size]].map(Math.round).join(',') + ')';
+    });
 
+    var circle = vis
+      .selectAll('circle.nope')
+        .data(circles)
+        .enter().append('svg:circle');
+
+    if (init) {
       circle = circle
-        .attr('cx', unitOld * xOld + halfOld)
-        .attr('cy', unitOld * yOld + halfOld)
-        .attr('r', halfOld)
-        .attr('fill', 'rgb(' + colorHash[clsOld].map(Math.round).join(',') + ')')
-        .attr('fill-opacity', 0.68)
-          .transition()
-          .duration(300);
-    } else {
-      circle = circle
-        .attr('cx', unit * x + half)
-        .attr('cy', unit * y + half)
+        .attr('cx',   function(d) { return d.size * (d.x + .5); })
+        .attr('cy',   function(d) { return d.size * (d.y + .5); })
         .attr('r', 4)
         .attr('fill', 'rgb(255,255,255)')
           .transition()
-          .duration(2000);
+          .duration(1800);
+    } else {
+      circle = circle
+        .attr('cx',   function(d) { d = d.parent; return d.size * (d.x + .5); })
+        .attr('cy',   function(d) { d = d.parent; return d.size * (d.y + .5); })
+        .attr('r',    function(d) { d = d.parent; return d.size / 2; })
+        .attr('fill', function(d) { d = d.parent; return d.color; })
+        .attr('fill-opacity', 0.68)
+          .transition()
+          .duration(300);
     }
 
     circle
-      .attr('cx', unit * x + half)
-      .attr('cy', unit * y + half)
-      .attr('r', half)
-      .attr('fill', 'rgb(' + colorHash[classStr].map(Math.round).join(',') + ')')
+      .attr('cx',   function(d) { return d.size * (d.x + .5); })
+      .attr('cy',   function(d) { return d.size * (d.y + .5); })
+      .attr('r',    function(d) { return d.size / 2; })
+      .attr('fill', function(d) { return d.color; })
       .attr('fill-opacity', 1)
-      .each("end", finish);
+      .each("end", addEvents);
   }
 
   function loadImage(imageData) {
+    var x, y;
+    var dim  = maxSize / minSize;
+
     try {
       canvas.drawImage(imageData, 0, 0, dim, dim);
       data = canvas.getImageData(0, 0, dim, dim).data;
@@ -141,7 +141,6 @@ function KttM(options) {
       alert("Failed to load image.");
       return;
     }
-    var depth = Math.round(Math.log(dim) / Math.log(2));
 
     colorHash = {};
 
@@ -149,28 +148,30 @@ function KttM(options) {
     for (y = 0; y < dim; y++) {
       for (x = 0; x < dim; x++) {
         var col = [data[t], data[t+1], data[t+2]];
-        colorHash['c' + [x,y,depth].join('_')] = col;
+        colorHash[[x,y,minSize]] = col;
         t += 4;
       }
     }
 
-    level = dim;
-    do {
-      level /= 2;
-      depth--;
-      for (y = 0; y < level; y++) {
-        for (x = 0; x < level; x++) {
-          colorHash['c' + [x,y,depth].join('_')] = avgCol(
-            colorHash['c' + [2*x  ,2*y  ,depth+1].join('_')],
-            colorHash['c' + [2*x+1,2*y  ,depth+1].join('_')],
-            colorHash['c' + [2*x  ,2*y+1,depth+1].join('_')],
-            colorHash['c' + [2*x+1,2*y+1,depth+1].join('_')]
+    var size = minSize;
+    while (size < maxSize) {
+      dim /= 2;
+      var nextSize = size * 2;
+      for (y = 0; y < dim; y++) {
+        for (x = 0; x < dim; x++) {
+          colorHash[[x,y,nextSize]] = avgCol(
+            colorHash[[2*x  , 2*y  , size]],
+            colorHash[[2*x+1, 2*y  , size]],
+            colorHash[[2*x  , 2*y+1, size]],
+            colorHash[[2*x+1, 2*y+1, size]]
           );
         }
       }
-    } while(level > 1);
+      size = nextSize;
+    }
 
-    addCircle(0, 0, 0);
+    vis.selectAll('circle').remove();
+    addCircles([{x:0, y:0, size:maxSize}], true);
   }
 
   return loadImage;
