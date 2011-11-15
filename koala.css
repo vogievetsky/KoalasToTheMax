@@ -1,0 +1,65 @@
+html,
+body {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  font-size: 14px;
+  font-family: "Helvetica Neue",Arial,Sans-serif;
+  text-align: center;
+  cursor: default;
+
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+div {
+  cursor: inherit;
+}
+
+a {
+  color: steelBlue;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+#center {
+  position: relative;
+  height: 100%;
+  width: 512px;
+  margin: 0 auto;
+}
+
+#cont {
+  position: absolute;
+  top: 50%;
+  margin-top: -270px;
+  width:  512px;
+  height: 570px;
+}
+
+#dot {
+  width:  512px;
+  height: 512px;
+}
+
+#next div {
+  padding-top: 30px;
+}
+
+#footer {
+  position: fixed;
+  font-weight: 300;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-top: 18px;
+  padding-bottom: 2px;
+  background: -webkit-gradient(linear, left bottom, left top, from(rgba(255, 255, 255, 1)), to(rgba(255, 255, 255, 0)));
+  background: -moz-linear-gradient(bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+}

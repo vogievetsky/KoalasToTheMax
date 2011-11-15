@@ -1,0 +1,23 @@
+        // Start slow opening on bubbles
+        var interval;
+        d3.select('body').on('keydown', function() {
+          if(d3.event.which === 32) {
+            if (interval) {
+              clearInterval(interval);
+              interval = null;
+            } else {
+              interval = setInterval(function() {
+                var expandable = vis.selectAll("circle")
+                  .filter(function() { return d3.select(window.ppp = this).on('mouseover'); })[0];
+
+                if (expandable.length > 0) {
+                  var ex = expandable[Math.floor(Math.random() * expandable.length)];
+                  d3.select(ex).on('mouseover');
+                } else {
+                  clearInterval(interval);
+                  interval = null;
+                }
+              }, 150);
+            }
+          }
+        });

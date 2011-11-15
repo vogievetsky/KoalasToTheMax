@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Koalas to the Max dot Com</title>
+    <meta name="description" content="Koalas to the Max, a site made with love by Vadim Ogievetsky for Annie Albagli" />
+    <meta name="keywords" content="Koalas Vadim Ogievetsky Annie Albagli" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <script type="text/javascript" src="d3.min.js"></script>
+    <script type="text/javascript" src="koala.js"></script>
+    <style type="text/css">
+      @import url("koala.css");
+    </style>
+  </head>
+  <body>
+    <div id="center">
+      <div id="cont">
+        <div id="dots">
+        </div>
+        <a id="next">
+          <div style="display: none">
+            Need more Koalas?
+          </div>
+        </a>
+      </div>
+    </div>
+    <div id="footer">
+      Made with love by
+      <a href="http://vadim.ogievetsky.com">Vadim Ogievetsky</a>
+      for
+      <a href="http://anniealbagli.com">Annie Albagli</a>
+      &nbsp; / &nbsp;
+      Powered by
+      <a href="http://mbostock.github.com/d3">D3</a>
+    </div>
+    <script type="text/javascript">
+
+      if(/MSIE [3-8]/i.test(navigator.userAgent)) {
+        alert("Sorry, Internet Explorer is not supported, please get a modern browser like Chrome of Firefox");
+      } else {
+        var loadImage = KttM({
+          selector: "div#dots",
+          onDone: function() {
+            // $('#next')
+            // Work in progress
+          }
+        });
+
+        var hrefSplit = window.location.href.split("?", 2);
+        var domian = hrefSplit[0];
+        var file = hrefSplit[1];
+        if (file) {
+          if (file.match(/^[a-z0-9+\/=]+$/i)) {
+            file = atob(file);
+          } else {
+            // Hide the link in the url
+            window.location.href = domian + '?' + btoa(file);
+          }
+        } else {
+          file = 'koalas0.jpg';
+        }
+        if (file.substring(0, 5) === 'http:') {
+          file = "image-server.php?url=" + file;
+        }
+        var img = new Image();
+        img.onload = function() { loadImage(this); };
+        img.src = file;
+      }
+
+    </script>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-17409200-2']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+  </body>
+</html>
