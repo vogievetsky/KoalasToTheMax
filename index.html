@@ -37,14 +37,6 @@
       if(/MSIE [3-8]/i.test(navigator.userAgent)) {
         alert("Sorry, Internet Explorer is not supported, please get a modern browser like Chrome of Firefox");
       } else {
-        var loadImage = KttM({
-          selector: "div#dots",
-          onDone: function() {
-            // $('#next')
-            // Work in progress
-          }
-        });
-
         var hrefSplit = window.location.href.split("?", 2);
         var domian = hrefSplit[0];
         var file = hrefSplit[1];
