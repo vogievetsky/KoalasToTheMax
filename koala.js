@@ -103,7 +103,7 @@ function addCircles(circles, init) {
       .attr('r', 4)
       .attr('fill', 'rgb(255,255,255)')
         .transition()
-        .duration(1800);
+        .duration(1000);
   } else {
     // Setup the initial state of the opened circles
     circle = circle
@@ -128,6 +128,7 @@ function addCircles(circles, init) {
 
 function onDone() {
   // something cool happens when done
+  // ToDo
 }
 
 function loadImage(imageData) {
@@ -185,6 +186,7 @@ function loadImage(imageData) {
   // Create the initial circle
   addCircles([{x:0, y:0, size:maxSize}], true);
 }
+
 
 
 
