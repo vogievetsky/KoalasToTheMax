@@ -41,7 +41,7 @@ var numClicks = 0;
 function onCircleClick() {
   numClicks++;
   if (numClicks !== 5) return;
-  alert("You don't have to click, you can just mouse over. :-)");
+  //alert("You don't have to click, you can just mouse over. :-)");
 }
 
 // Find out if all the circles have been oppened
@@ -83,7 +83,8 @@ function addEvents(d) {
       .on('click', onCircleClick);
 
     if (d.size === maxSize) {
-      circle.on('mousemove', split);
+      circle
+        .on('mousemove', split);
     }
   }
   doneCheckNeeded = true;
@@ -184,6 +185,7 @@ function loadImage(imageData) {
   }
 
   // Create the initial circle
+  // addCircles([{x:0, y:0, size:maxSize}], true);
   addCircles([{x:0, y:0, size:maxSize}], true);
 }
 
