@@ -8,11 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <script type="text/javascript" src="d3.min.js"></script>
-    <script type="text/javascript" src="koala.js"></script>
-    <style type="text/css">
-      @import url("koala.css");
-    </style>
+    <script type="text/javascript" src="d3.min.js?1.2"></script>
+    <script type="text/javascript" src="koala.js?1.2"></script>
+    <link rel="stylesheet" type="text/css" href="koala.css?1.2"/>
   </head>
   <body>
     <div id="center">
@@ -40,14 +38,6 @@
       if(/MSIE [3-8]/i.test(navigator.userAgent)) {
         alert("Sorry, Internet Explorer is not supported, please get a modern browser like Chrome of Firefox");
       } else {
-        function blockScroll(e) {
-          //d3.event.preventDefault();
-        }
-
-        d3.select('body')
-          .on('touchstart', blockScroll)
-          .on('touchend', blockScroll);
-
         var hrefSplit = window.location.href.split("?", 2);
         var domian = hrefSplit[0];
         var file = hrefSplit[1];

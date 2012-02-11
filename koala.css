@@ -48,6 +48,11 @@ a:hover {
   height: 512px;
 }
 
+svg,
+circle {
+  pointer-events: none;
+}
+
 #next div {
   padding-top: 30px;
 }
@@ -64,6 +69,3 @@ a:hover {
   background: -moz-linear-gradient(bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
 }
 
-circle {
-  pointer-events: none;
-}

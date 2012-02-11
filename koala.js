@@ -1,27 +1,26 @@
+"use strict"
+
 /*
- * Made with love by Vadim Ogievetsky for Annie Albagli (Valentine's Day 2011)
- * Powered by Mike Bostock's D3
- *
- * If you are reading this then I have an easter egg for you:
- * You can use your own custom image as the source, simply type in:
- * http://koalastothemax.com?<your image url>
- * e.g.
- * http://koalastothemax.com?http://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Flag_of_the_United_Kingdom.svg/200px-Flag_of_the_United_Kingdom.svg.png
- *
- * also if you want to use a custom image and want people to guess what it is
- * (without seeing the url) then you can type the url in base64 encoding like so:
- * http://koalastothemax.com?<your image url in base64>
- * e.g.
- * http://koalastothemax.com?YXN0bGV5LmpwZw==
- * (try to guess the image above)
- */
+* Made with love by Vadim Ogievetsky for Annie Albagli (Valentine's Day 2011)
+* Powered by Mike Bostock's D3
+*
+* If you are reading this then I have an easter egg for you:
+* You can use your own custom image as the source, simply type in:
+* http://koalastothemax.com?<your image url>
+* e.g.
+* http://koalastothemax.com?http://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Flag_of_the_United_Kingdom.svg/200px-Flag_of_the_United_Kingdom.svg.png
+*
+* also if you want to use a custom image and want people to guess what it is
+* (without seeing the url) then you can type the url in base64 encoding like so:
+* http://koalastothemax.com?<your image url in base64>
+* e.g.
+* http://koalastothemax.com?YXN0bGV5LmpwZw==
+* (try to guess the image above)
+*/
 
 var vis,
     maxSize = 512,
     minSize = 4;
-
-var colorHash;
-var leftToOpen = [];
 
 // Find the color average of 4 colors in the RGB colorspace
 function avgCol(x, y, z, w) {
@@ -32,8 +31,8 @@ function avgCol(x, y, z, w) {
   ];
 }
 
-function dataRGBString(d) {
-  return 'rgb(' + colorHash[[d.x, d.y, d.size]].map(Math.round).join(',') + ')';
+function colToRGB(col) {
+  return 'rgb(' + col.map(Math.round).join(',') + ')';
 }
 
 // Some people tend to try and click the circles.
@@ -44,58 +43,24 @@ function onCircleClick() {
   //alert("You don't have to click, you can just mouse over. :-)");
 }
 
-// Find out if all the circles have been oppened
-var doneCheckNeeded = false;
-var doneInterval = setInterval(function() {
-  if (!doneCheckNeeded) return;
-  doneCheckNeeded = false;
-
-  if (!vis
-    .selectAll('circle')
-    .filter(function(d) { return d.size > minSize; })
-    .empty()) return;
-
-  onDone();
-  clearInterval(doneInterval);
-}, 100);
-
 function split(d) {
-  if (d.removed || d.size <= minSize) return;
-  d.removed = true;
-  d3.select(this).remove();
-
-  var x2 = 2 * d.x;
-  var y2 = 2 * d.y;
-  var nextSize = d.size / 2;
-
-  addCircles([
-    { x: x2,   y: y2,   size: nextSize, parent: d },
-    { x: x2+1, y: y2,   size: nextSize, parent: d },
-    { x: x2,   y: y2+1, size: nextSize, parent: d },
-    { x: x2+1, y: y2+1, size: nextSize, parent: d }
-  ])
+  if (!d.node || !d.children) return;
+  d3.select(d.node).remove();
+  delete d.node;
+  addCircles(d.children);
 }
 
 function addCircles(circles, init) {
-  for (var i = 0; i < circles.length; i++) {
-    var d = circles[i],
-        s = d.size;
-    d.px = s * (d.x + .5);
-    d.py = s * (d.y + .5);
-    d.r  = s / 2;
-    d.c  = dataRGBString(d);
-  }
-
   var circle = vis
-    .selectAll('circle.nope')
+    .selectAll('.nope')
       .data(circles)
       .enter().append('circle');
 
   if (init) {
     // Setup the initial state of the initial circle
     circle = circle
-      .attr('cx',   function(d) { return d.px; })
-      .attr('cy',   function(d) { return d.py; })
+      .attr('cx',   function(d) { return d.x; })
+      .attr('cy',   function(d) { return d.y; })
       .attr('r', 4)
       .attr('fill', 'rgb(255,255,255)')
         .transition()
@@ -103,10 +68,10 @@ function addCircles(circles, init) {
   } else {
     // Setup the initial state of the opened circles
     circle = circle
-      .attr('cx',   function(d) { d = d.parent; return d.px; })
-      .attr('cy',   function(d) { d = d.parent; return d.py; })
+      .attr('cx',   function(d) { d = d.parent; return d.x; })
+      .attr('cy',   function(d) { d = d.parent; return d.y; })
       .attr('r',    function(d) { d = d.parent; return d.r; })
-      .attr('fill', function(d) { d = d.parent; return d.c; })
+      .attr('fill', function(d) { d = d.parent; return d.rgb; })
       .attr('fill-opacity', 0.68)
         .transition()
         .duration(300);
@@ -114,25 +79,23 @@ function addCircles(circles, init) {
 
   // Transition the to the respective final state
   circle
-    .attr('cx',   function(d) { return d.px; })
-    .attr('cy',   function(d) { return d.py; })
+    .attr('cx',   function(d) { return d.x; })
+    .attr('cy',   function(d) { return d.y; })
     .attr('r',    function(d) { return d.r; })
-    .attr('fill', function(d) { return d.c; })
+    .attr('fill', function(d) { return d.rgb; })
     .attr('fill-opacity', 1)
-    .each('end', function() { d3.select(this).attr('class', 'ready'); });
-}
-
-function onDone() {
-  // something cool happens when done
-  // ToDo
+    .each('end',  function(d) {
+        d.node = this;
+        d3.select(this).attr('class', 'ready');
+      });
 }
 
 function loadImage(imageData) {
-  var x, y;
   var dim  = maxSize / minSize;
+  var canvas, data;
 
   try {
-    var canvas = document.createElement('canvas').getContext('2d');
+    canvas = document.createElement('canvas').getContext('2d');
     canvas.drawImage(imageData, 0, 0, dim, dim);
     data = canvas.getImageData(0, 0, dim, dim).data;
   } catch(e) {
@@ -140,32 +103,52 @@ function loadImage(imageData) {
     return;
   }
 
-  colorHash = {};
+  // Got the data now build the tree
+  var prevLayer = {};
+  var layer;
+  var size = minSize;
+  var x, y, t, col;
 
-  var t = 0;
+  t = 0;
   for (y = 0; y < dim; y++) {
     for (x = 0; x < dim; x++) {
-      var col = [data[t], data[t+1], data[t+2]];
-      colorHash[[x,y,minSize]] = col;
+      col = [data[t], data[t+1], data[t+2]];
+      prevLayer[[x,y]] = {
+        x:   size * (x + .5),
+        y:   size * (y + .5),
+        r:   size / 2,
+        col: col,
+        rgb: colToRGB(col)
+      };
       t += 4;
     }
   }
 
-  var size = minSize;
+  var grid = prevLayer;
+
+  var c1, c2, c3, c4;
   while (size < maxSize) {
     dim /= 2;
-    var nextSize = size * 2;
+    size = size * 2;
+    layer = {};
     for (y = 0; y < dim; y++) {
       for (x = 0; x < dim; x++) {
-        colorHash[[x,y,nextSize]] = avgCol(
-          colorHash[[2*x  , 2*y  , size]],
-          colorHash[[2*x+1, 2*y  , size]],
-          colorHash[[2*x  , 2*y+1, size]],
-          colorHash[[2*x+1, 2*y+1, size]]
-        );
+        c1 = prevLayer[[2*x  , 2*y  ]];
+        c2 = prevLayer[[2*x+1, 2*y  ]];
+        c3 = prevLayer[[2*x  , 2*y+1]];
+        c4 = prevLayer[[2*x+1, 2*y+1]];
+        col = avgCol(c1.col, c2.col, c3.col, c4.col);
+        layer[[x,y]] = c1.parent = c2.parent = c3.parent = c4.parent = {
+          x:   size * (x + .5),
+          y:   size * (y + .5),
+          r:   size / 2,
+          col: col,
+          rgb: colToRGB(col),
+          children: [c1, c2, c3, c4]
+        };
       }
     }
-    size = nextSize;
+    prevLayer = layer;
   }
 
   // Make sure that the svg exists and is empty
@@ -179,35 +162,36 @@ function loadImage(imageData) {
     vis.selectAll('circle').remove();
   }
 
-  var xp, yp;
+  function findBase(pos) {
+    var x = Math.floor(pos[0] / minSize),
+        y = Math.floor(pos[1] / minSize),
+        base = grid[[x,y]];
+    if (!base) return null;
+    while (base && !base.node) base = base.parent;
+    return base || null;
+  }
+
+  var posPrev = [];
   function findAndSplit(posFn) {
     return function() {
       var pos = posFn(),
           n = pos.length;
 
-      vis.selectAll('circle.ready')
-        .filter(function(d) {
-            for (var i = 0; i < n; i++) {
-              var p = pos[i],
-                  dx = d.px - p[0],
-                  dy = d.py - p[1],
-                  dxp = d.px - xp,
-                  dyp = d.py - yp,
-                  s = d.size;
-                  r2 = d.r * d.r;
+      for (var i = 0; i < n; i++) {
+        var p = pos[i];
+        var d = findBase(p);
+        if (d && d.children) {
+          var pp  = posPrev[i] || [0,0],
+              dx  = d.x - p[0],
+              dy  = d.y - p[1],
+              dxp = d.x - pp[0],
+              dyp = d.y - pp[1],
+              r2  = d.r * d.r;
 
-              if (minSize < s
-                && dx*dx + dy*dy <= r2
-                && dxp*dxp + dyp*dyp > r2) {
-                return true;
-              }
-            }
-            return false;
-          })
-        .each(split);
-
-      xp = x;
-      yp = y;
+          if (dx*dx + dy*dy <= r2 && dxp*dxp + dyp*dyp >= r2) split(d);
+        }
+        posPrev[i] = p;
+      }
       d3.event.preventDefault();
     }
   }
@@ -220,7 +204,7 @@ function loadImage(imageData) {
     .on('touchmove', findAndSplit(touchFn));
 
   // Create the initial circle
-  addCircles([{x:0, y:0, size:maxSize}], true);
+  addCircles([layer[[0,0]]], true);
 }
 
 
