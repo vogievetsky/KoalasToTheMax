@@ -63,3 +63,7 @@ a:hover {
   background: -webkit-gradient(linear, left bottom, left top, from(rgba(255, 255, 255, 1)), to(rgba(255, 255, 255, 0)));
   background: -moz-linear-gradient(bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
 }
+
+circle {
+  pointer-events: none;
+}

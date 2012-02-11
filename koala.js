@@ -76,31 +76,26 @@ function split(d) {
   ])
 }
 
-function addEvents(d) {
-  if (d.size > minSize) {
-    var circle = d3.select(this)
-      .on('mouseover', split)
-      .on('click', onCircleClick);
-
-    if (d.size === maxSize) {
-      circle
-        .on('mousemove', split);
-    }
-  }
-  doneCheckNeeded = true;
-}
-
 function addCircles(circles, init) {
+  for (var i = 0; i < circles.length; i++) {
+    var d = circles[i],
+        s = d.size;
+    d.px = s * (d.x + .5);
+    d.py = s * (d.y + .5);
+    d.r  = s / 2;
+    d.c  = dataRGBString(d);
+  }
+
   var circle = vis
     .selectAll('circle.nope')
       .data(circles)
-      .enter().append('svg:circle');
+      .enter().append('circle');
 
   if (init) {
     // Setup the initial state of the initial circle
     circle = circle
-      .attr('cx',   function(d) { return d.size * (d.x + .5); })
-      .attr('cy',   function(d) { return d.size * (d.y + .5); })
+      .attr('cx',   function(d) { return d.px; })
+      .attr('cy',   function(d) { return d.py; })
       .attr('r', 4)
       .attr('fill', 'rgb(255,255,255)')
         .transition()
@@ -108,10 +103,10 @@ function addCircles(circles, init) {
   } else {
     // Setup the initial state of the opened circles
     circle = circle
-      .attr('cx',   function(d) { d = d.parent; return d.size * (d.x + .5); })
-      .attr('cy',   function(d) { d = d.parent; return d.size * (d.y + .5); })
-      .attr('r',    function(d) { d = d.parent; return d.size / 2; })
-      .attr('fill', function(d) { d = d.parent; return dataRGBString(d); })
+      .attr('cx',   function(d) { d = d.parent; return d.px; })
+      .attr('cy',   function(d) { d = d.parent; return d.py; })
+      .attr('r',    function(d) { d = d.parent; return d.r; })
+      .attr('fill', function(d) { d = d.parent; return d.c; })
       .attr('fill-opacity', 0.68)
         .transition()
         .duration(300);
@@ -119,12 +114,12 @@ function addCircles(circles, init) {
 
   // Transition the to the respective final state
   circle
-    .attr('cx',   function(d) { return d.size * (d.x + .5); })
-    .attr('cy',   function(d) { return d.size * (d.y + .5); })
-    .attr('r',    function(d) { return d.size / 2; })
-    .attr('fill', dataRGBString)
+    .attr('cx',   function(d) { return d.px; })
+    .attr('cy',   function(d) { return d.py; })
+    .attr('r',    function(d) { return d.r; })
+    .attr('fill', function(d) { return d.c; })
     .attr('fill-opacity', 1)
-    .each("end", addEvents);
+    .each('end', function() { d3.select(this).attr('class', 'ready'); });
 }
 
 function onDone() {
@@ -177,15 +172,54 @@ function loadImage(imageData) {
   if (!vis) {
     // Create the SVG ellement
     vis = d3.select("div#dots")
-      .append("svg:svg")
+      .append("svg")
         .attr("width", maxSize)
         .attr("height", maxSize);
   } else {
     vis.selectAll('circle').remove();
   }
 
+  var xp, yp;
+  function findAndSplit(posFn) {
+    return function() {
+      var pos = posFn(),
+          n = pos.length;
+
+      vis.selectAll('circle.ready')
+        .filter(function(d) {
+            for (var i = 0; i < n; i++) {
+              var p = pos[i],
+                  dx = d.px - p[0],
+                  dy = d.py - p[1],
+                  dxp = d.px - xp,
+                  dyp = d.py - yp,
+                  s = d.size;
+                  r2 = d.r * d.r;
+
+              if (minSize < s
+                && dx*dx + dy*dy <= r2
+                && dxp*dxp + dyp*dyp > r2) {
+                return true;
+              }
+            }
+            return false;
+          })
+        .each(split);
+
+      xp = x;
+      yp = y;
+      d3.event.preventDefault();
+    }
+  }
+
+  function mouseFn() { return [d3.svg.mouse(vis.node())]; }
+  function touchFn() { return d3.svg.touches(vis.node()); }
+
+  d3.select('body')
+    .on('mousemove', findAndSplit(mouseFn))
+    .on('touchmove', findAndSplit(touchFn));
+
   // Create the initial circle
-  // addCircles([{x:0, y:0, size:maxSize}], true);
   addCircles([{x:0, y:0, size:maxSize}], true);
 }
 
