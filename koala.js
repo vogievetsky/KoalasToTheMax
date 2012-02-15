@@ -125,7 +125,7 @@ function loadImage(imageData, onEvent) {
     vis.selectAll('circle').remove();
   }
 
-  var nextPercent = 0.1;
+  var nextPercent = 0;
   function split(d) {
     if (!d.node || !d.children) return;
     d3.select(d.node).remove();
@@ -135,19 +135,14 @@ function loadImage(imageData, onEvent) {
     // manage events
     var l = d.layer;
     activeLayerCount[l]--;
-    if (activeLayerCount[l] == 0) {
-      if (l == 0) {
-        onEvent('done', 1);
-        return;
-      } else {
-        onEvent('layer', l);
-      }
+    if (activeLayerCount[l] === 0) {
+      onEvent('LayerClear', l);
     }
 
     var percent = 1 - d3.sum(activeLayerCount) / activeTotalCount;
-    if (percent > nextPercent) {
-      onEvent('percent', Math.round(nextPercent * 100));
-      nextPercent += 0.1;
+    if (percent >= nextPercent) {
+      onEvent('PercentClear', Math.round(nextPercent * 100));
+      nextPercent += 0.05;
     }
   }
 
