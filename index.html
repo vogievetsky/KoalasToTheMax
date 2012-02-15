@@ -17,11 +17,10 @@
       <div id="cont">
         <div id="dots">
         </div>
-        <a id="next">
-          <div style="display: none">
-            Need more Koalas?
-          </div>
-        </a>
+        <div id="next" style="display: none">
+          <div>Awesome stuff! Now make your own. Paste an image url bellow and click Enter:</div>
+          <input placeholder="http://imgur.com/your_favourite_image.jpg"></input>
+        </div>
       </div>
     </div>
     <div id="footer">
@@ -34,10 +33,12 @@
       <a href="http://mbostock.github.com/d3">D3</a>
     </div>
     <script type="text/javascript">
+      (function() {
+        if(/MSIE [3-8]/i.test(navigator.userAgent)) {
+          alert("Sorry, Internet Explorer is not supported, please get a modern browser like Chrome of Firefox");
+          return;
+        }
 
-      if(/MSIE [3-8]/i.test(navigator.userAgent)) {
-        alert("Sorry, Internet Explorer is not supported, please get a modern browser like Chrome of Firefox");
-      } else {
         var hrefSplit = window.location.href.split("?", 2);
         var domian = hrefSplit[0];
         var file = hrefSplit[1];
@@ -61,16 +62,28 @@
         function onEvent(what, value) {
           var time = Math.round((Date.now() - now) / 1000);
           _gaq.push(['_trackEvent', what, String(value), window.location.href, time]);
-          if (what == 'done') {
-            // ToDo
-          }
+
+          if (what !== 'done') return;
+          d3.select('#next')
+            .style('display', null)
+            .select('input')
+              .on('keydown', function() {
+                if (d3.event.keyCode !== 13) return;
+                time = Math.round((Date.now() - now) / 1000);
+                var input = d3.select(this)
+                  .style('display', 'none')
+                  .property('value');
+
+                _gaq.push(['_trackEvent', 'submit', input, window.location.href, time]);
+                d3.select('#next div').text('Thinking...');
+                setTimeout(function() { window.location.href = domian + '?' + btoa(input); }, 750);
+              });
         }
 
         var img = new Image();
         img.onload = function() { loadImage(this, onEvent); };
         img.src = file;
-      }
-
+      })();
     </script>
     <script type="text/javascript">
 

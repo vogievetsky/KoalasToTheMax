@@ -5,6 +5,7 @@ body {
   width: 100%;
   font-size: 14px;
   font-family: "Helvetica Neue",Arial,Sans-serif;
+  font-weight: 300;
   text-align: center;
   cursor: default;
 
@@ -53,13 +54,18 @@ circle {
   pointer-events: none;
 }
 
-#next div {
+#next {
   padding-top: 30px;
+}
+
+#next input {
+  width: 480px;
+  border: 1px solid #ccc;
+  outline: none;
 }
 
 #footer {
   position: fixed;
-  font-weight: 300;
   bottom: 0;
   left: 0;
   right: 0;
