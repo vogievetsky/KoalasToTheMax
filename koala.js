@@ -146,7 +146,7 @@ function loadImage(imageData, onEvent) {
 
     var percent = 1 - d3.sum(activeLayerCount) / activeTotalCount;
     if (percent > nextPercent) {
-      onEvent('percent', nextPercent * 100);
+      onEvent('percent', Math.round(nextPercent * 100));
       nextPercent += 0.1;
     }
   }
