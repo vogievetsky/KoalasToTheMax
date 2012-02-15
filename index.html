@@ -57,10 +57,12 @@
           file = "image-server.php?url=" + file;
         }
 
+        var now = Date.now();
         function onEvent(what, value) {
-          _gaq.push(['_trackEvent', what, value]);
+          var time = Math.round((Date.now() - now) / 1000);
+          _gaq.push(['_trackEvent', what, String(value), window.location.href, time]);
           if (what == 'done') {
-            // todo
+            // ToDo
           }
         }
 
