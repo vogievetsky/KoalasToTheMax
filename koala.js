@@ -62,9 +62,7 @@ function loadImage(imageData, onEvent) {
   var layer;
   var size = minSize;
   var x, y, t, col;
-  var layerNumber = 0
-  var layerCount = [];
-  var totalCount = 0;
+
 
   t = 0;
   for (y = 0; y < dim; y++) {
@@ -75,14 +73,15 @@ function loadImage(imageData, onEvent) {
         y:   size * (y + .5),
         r:   size / 2,
         col: col,
-        rgb: colToRGB(col),
-        layer: layerNumber
+        rgb: colToRGB(col)
       };
       t += 4;
     }
   }
-  layerCount.push(dim * dim);
-  totalCount += dim * dim;
+
+  var activeLayerNumber = 0
+  var activeLayerCount = [];
+  var activeTotalCount = 0;
 
   var grid = prevLayer;
 
@@ -90,7 +89,6 @@ function loadImage(imageData, onEvent) {
   while (size < maxSize) {
     dim /= 2;
     size = size * 2;
-    layerNumber++;
     layer = {};
     for (y = 0; y < dim; y++) {
       for (x = 0; x < dim; x++) {
@@ -106,12 +104,13 @@ function loadImage(imageData, onEvent) {
           col: col,
           rgb: colToRGB(col),
           children: [c1, c2, c3, c4],
-          layer: layerNumber
+          layer: activeLayerNumber
         };
       }
     }
-    layerCount.push(dim * dim);
-    totalCount += dim * dim;
+    activeLayerCount.push(dim * dim);
+    activeTotalCount += dim * dim;
+    activeLayerNumber++;
     prevLayer = layer;
   }
 
@@ -126,17 +125,29 @@ function loadImage(imageData, onEvent) {
     vis.selectAll('circle').remove();
   }
 
+  var nextPercent = 0.1;
   function split(d) {
     if (!d.node || !d.children) return;
     d3.select(d.node).remove();
     delete d.node;
     addCircles(d.children);
 
-    layerCount[d.layer]--;
-    if (layerCount[d.layer] == 0) {
-      if (d.layer == 0) {
-        onEvent('done')
+    // manage events
+    var l = d.layer;
+    activeLayerCount[l]--;
+    if (activeLayerCount[l] == 0) {
+      if (l == 0) {
+        onEvent('done', 1);
+        return;
+      } else {
+        onEvent('layer', l);
       }
+    }
+
+    var percent = 1 - d3.sum(activeLayerCount) / activeTotalCount;
+    if (percent > nextPercent) {
+      onEvent('percent', nextPercent * 100);
+      nextPercent += 0.1;
     }
   }
 

@@ -41,6 +41,7 @@
         var hrefSplit = window.location.href.split("?", 2);
         var domian = hrefSplit[0];
         var file = hrefSplit[1];
+
         if (file) {
           if (file.match(/^[a-z0-9+\/=]+$/i)) {
             file = atob(file);
@@ -51,11 +52,20 @@
         } else {
           file = 'koalas0.jpg';
         }
+
         if (file.substring(0, 5) === 'http:') {
           file = "image-server.php?url=" + file;
         }
+
+        function onEvent(what, value) {
+          _gaq.push(['_trackEvent', what, value]);
+          if (what == 'done') {
+            // todo
+          }
+        }
+
         var img = new Image();
-        img.onload = function() { loadImage(this); };
+        img.onload = function() { loadImage(this, onEvent); };
         img.src = file;
       }
 
