@@ -43,54 +43,8 @@ function onCircleClick() {
   //alert("You don't have to click, you can just mouse over. :-)");
 }
 
-function split(d) {
-  if (!d.node || !d.children) return;
-  d3.select(d.node).remove();
-  delete d.node;
-  addCircles(d.children);
-}
-
-function addCircles(circles, init) {
-  var circle = vis
-    .selectAll('.nope')
-      .data(circles)
-      .enter().append('circle');
-
-  if (init) {
-    // Setup the initial state of the initial circle
-    circle = circle
-      .attr('cx',   function(d) { return d.x; })
-      .attr('cy',   function(d) { return d.y; })
-      .attr('r', 4)
-      .attr('fill', 'rgb(255,255,255)')
-        .transition()
-        .duration(1000);
-  } else {
-    // Setup the initial state of the opened circles
-    circle = circle
-      .attr('cx',   function(d) { d = d.parent; return d.x; })
-      .attr('cy',   function(d) { d = d.parent; return d.y; })
-      .attr('r',    function(d) { d = d.parent; return d.r; })
-      .attr('fill', function(d) { d = d.parent; return d.rgb; })
-      .attr('fill-opacity', 0.68)
-        .transition()
-        .duration(300);
-  }
-
-  // Transition the to the respective final state
-  circle
-    .attr('cx',   function(d) { return d.x; })
-    .attr('cy',   function(d) { return d.y; })
-    .attr('r',    function(d) { return d.r; })
-    .attr('fill', function(d) { return d.rgb; })
-    .attr('fill-opacity', 1)
-    .each('end',  function(d) {
-        d.node = this;
-        d3.select(this).attr('class', 'ready');
-      });
-}
-
-function loadImage(imageData) {
+function loadImage(imageData, onEvent) {
+  onEvent = onEvent || function() {};
   var dim  = maxSize / minSize;
   var canvas, data;
 
@@ -108,6 +62,9 @@ function loadImage(imageData) {
   var layer;
   var size = minSize;
   var x, y, t, col;
+  var layerNumber = 0
+  var layerCount = [];
+  var totalCount = 0;
 
   t = 0;
   for (y = 0; y < dim; y++) {
@@ -118,11 +75,14 @@ function loadImage(imageData) {
         y:   size * (y + .5),
         r:   size / 2,
         col: col,
-        rgb: colToRGB(col)
+        rgb: colToRGB(col),
+        layer: layerNumber
       };
       t += 4;
     }
   }
+  layerCount.push(dim * dim);
+  totalCount += dim * dim;
 
   var grid = prevLayer;
 
@@ -130,6 +90,7 @@ function loadImage(imageData) {
   while (size < maxSize) {
     dim /= 2;
     size = size * 2;
+    layerNumber++;
     layer = {};
     for (y = 0; y < dim; y++) {
       for (x = 0; x < dim; x++) {
@@ -144,10 +105,13 @@ function loadImage(imageData) {
           r:   size / 2,
           col: col,
           rgb: colToRGB(col),
-          children: [c1, c2, c3, c4]
+          children: [c1, c2, c3, c4],
+          layer: layerNumber
         };
       }
     }
+    layerCount.push(dim * dim);
+    totalCount += dim * dim;
     prevLayer = layer;
   }
 
@@ -160,6 +124,60 @@ function loadImage(imageData) {
         .attr("height", maxSize);
   } else {
     vis.selectAll('circle').remove();
+  }
+
+  function split(d) {
+    if (!d.node || !d.children) return;
+    d3.select(d.node).remove();
+    delete d.node;
+    addCircles(d.children);
+
+    layerCount[d.layer]--;
+    if (layerCount[d.layer] == 0) {
+      if (d.layer == 0) {
+        onEvent('done')
+      }
+    }
+  }
+
+  function addCircles(circles, init) {
+    var circle = vis
+      .selectAll('.nope')
+        .data(circles)
+        .enter().append('circle');
+
+    if (init) {
+      // Setup the initial state of the initial circle
+      circle = circle
+        .attr('cx',   function(d) { return d.x; })
+        .attr('cy',   function(d) { return d.y; })
+        .attr('r', 4)
+        .attr('fill', 'rgb(255,255,255)')
+          .transition()
+          .duration(1000);
+    } else {
+      // Setup the initial state of the opened circles
+      circle = circle
+        .attr('cx',   function(d) { d = d.parent; return d.x; })
+        .attr('cy',   function(d) { d = d.parent; return d.y; })
+        .attr('r',    function(d) { d = d.parent; return d.r; })
+        .attr('fill', function(d) { d = d.parent; return d.rgb; })
+        .attr('fill-opacity', 0.68)
+          .transition()
+          .duration(300);
+    }
+
+    // Transition the to the respective final state
+    circle
+      .attr('cx',   function(d) { return d.x; })
+      .attr('cy',   function(d) { return d.y; })
+      .attr('r',    function(d) { return d.r; })
+      .attr('fill', function(d) { return d.rgb; })
+      .attr('fill-opacity', 1)
+      .each('end',  function(d) {
+          d.node = this;
+          d3.select(this).attr('class', 'ready');
+        });
   }
 
   function findBase(pos) {
