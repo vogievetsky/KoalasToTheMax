@@ -18,7 +18,10 @@
         <div id="dots">
         </div>
         <div id="next" style="display: none">
-          <div>Awesome stuff! Now make your own. Paste an image url bellow and click Enter:</div>
+          <div class="msg">
+            Awesome stuff! Now make your own and share the link.<br/>
+            Paste an image url bellow and click enter.
+          </div>
           <input placeholder="http://imgur.com/your_favourite_image.jpg"></input>
         </div>
       </div>
@@ -36,7 +39,7 @@
       (function() {
         if(/MSIE [3-8]/i.test(navigator.userAgent)) {
           _gaq.push(['_trackEvent', 'Problemo', 'IE', window.location.href]);
-          alert("Sorry, Internet Explorer is not supported, please get a modern browser like Chrome of Firefox");
+          alert("Sorry, Internet Explorer 8 (and bellow) is not supported, please get a modern browser like Safari, Chrome, Firefox or Internet Explorer 9");
           return;
         }
 
@@ -70,17 +73,24 @@
                 .style('display', null)
                 .select('input')
                   .on('keydown', function() {
+                    d3.select('div.err').remove();
                     if (d3.event.keyCode !== 13) return;
-                    var time = Math.round((Date.now() - now) / 1000);
-                    var input = d3.select(this)
-                      .style('display', 'none')
-                      .property('value');
+                    var input = d3.select(this).property('value');
 
-                    _gaq.push(['_trackEvent', 'Submit', input, window.location.href, time]);
-                    d3.select('#next div').text('Thinking...');
-                    setTimeout(function() {
-                      window.location.href = domian + '?' + btoa(input);
-                    }, 750);
+                    if (input.match(/http:\/\/.+\..+/i)) {
+                      var time = Math.round((Date.now() - now) / 1000);
+                      _gaq.push(['_trackEvent', 'Submit', input, window.location.href, time]);
+                      d3.select('#next div.msg').text('Thinking...');
+                      d3.select(this).style('display', 'none');
+                      setTimeout(function() {
+                        window.location.href = domian + '?' + btoa(input);
+                      }, 750);
+                    } else {
+                      d3.select('#next').selectAll('div.err').data([0])
+                        .enter().append('div')
+                        .attr('class', "err")
+                        .text("That doesn't appear to be a valid image URL. [Hint: it should start with 'http://']")
+                    }
                   });
             }
           }

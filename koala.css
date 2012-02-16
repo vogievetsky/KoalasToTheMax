@@ -64,6 +64,10 @@ circle {
   outline: none;
 }
 
+#next .err {
+  color: red;
+}
+
 #footer {
   position: fixed;
   bottom: 0;
