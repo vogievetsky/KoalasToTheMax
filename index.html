@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset='utf-8'>
     <title>Koalas to the Max dot Com</title>
     <meta name="description" content="Koalas to the Max, a site made with love by Vadim Ogievetsky for Annie Albagli" />
     <meta name="keywords" content="Koalas Max Vadim Ogievetsky Annie Albagli Koala Maximization" />
@@ -22,7 +23,7 @@
             Awesome stuff! Now make your own and share the link.<br/>
             Paste an image url bellow and click enter.
           </div>
-          <input placeholder="http://imgur.com/your_favourite_image.jpg"></input>
+          <input placeholder="http://imgur.com/your_favourite_image.jpg"/>
         </div>
       </div>
     </div>
@@ -37,6 +38,8 @@
     </div>
     <script type="text/javascript">
       (function() {
+        function track(type, subtype) {}
+
         if(/MSIE [3-8]/i.test(navigator.userAgent)) {
           _gaq.push(['_trackEvent', 'Problemo', 'IE', window.location.href]);
           alert("Sorry, Internet Explorer 8 (and bellow) is not supported, please get a modern browser like Safari, Chrome, Firefox or Internet Explorer 9");
