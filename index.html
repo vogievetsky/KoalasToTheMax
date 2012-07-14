@@ -37,19 +37,26 @@
     </div>
     <script>
       (function() {
-        function supportsSVG() {
-          return !!document.createElementNS && !!document.createElementNS('http://www.w3.org/2000/svg', "svg").createSVGRect;
+        var now = Date.now();
+        function track(type, subtype) {
+          var time = Math.round((Date.now() - now) / 1000);
+          function doTrack() {
+            if (!_gaq) return;
+            _gaq.push(['_trackEvent', String(type), String(subtype), window.location.href, time]);
+          }
+          if (_gaq) {
+            doTrack()
+          } else {
+            setTimeout(doTrack, 1);
+          }
         }
 
-        function track(type, subtype) {}
-
-        if (supportsSVG()) {
-          _gaq.push(['_trackEvent', 'Problemo', 'No SVG', window.location.href]);
+        if (!koala.supportsSVG()) {
+          track('Problemo', 'No SVG');
           alert("Sorry, KoalsToTheMax needs SVG support which your browser does not have. Supported browsers include Chrome, Safari, Firefox, Opera, and Internet Explorer 9");
           return;
         }
 
-        var now = Date.now();
         try {
           var hrefSplit = window.location.href.split("?", 2);
           var domian = hrefSplit[0];
@@ -71,8 +78,7 @@
           }
 
           function onEvent(what, value) {
-            var time = Math.round((Date.now() - now) / 1000);
-            _gaq.push(['_trackEvent', what, String(value), window.location.href, time]);
+            track(what, value);
 
             if (what === 'LayerClear' && value == 0) {
               d3.select('#next')
@@ -84,8 +90,7 @@
                     var input = d3.select(this).property('value');
 
                     if (input.match(/http:\/\/.+\..+/i)) {
-                      var time = Math.round((Date.now() - now) / 1000);
-                      _gaq.push(['_trackEvent', 'Submit', input, window.location.href, time]);
+                      track('Submit', input);
                       d3.select('#next div.msg').text('Thinking...');
                       d3.select(this).style('display', 'none');
                       setTimeout(function() {
@@ -102,11 +107,10 @@
           }
 
           var img = new Image();
-          img.onload = function() { loadImage(this, onEvent); };
+          img.onload = function() { koala.loadImage(this, onEvent); };
           img.src = file;
         } catch (e) {
-          var time = Math.round((Date.now() - now) / 1000);
-          _gaq.push(['_trackEvent', 'Problemo', '[' + String(e.message) + ']', window.location.href, time]);
+          track('Problemo', '[' + String(e.message) + ']');
           throw e;
         }
       })();
