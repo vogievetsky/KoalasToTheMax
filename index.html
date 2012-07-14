@@ -41,10 +41,10 @@
         function track(type, subtype) {
           var time = Math.round((Date.now() - now) / 1000);
           function doTrack() {
-            if (!_gaq) return;
+            if (!window._gaq) return;
             _gaq.push(['_trackEvent', String(type), String(subtype), window.location.href, time]);
           }
-          if (_gaq) {
+          if (window._gaq) {
             doTrack()
           } else {
             setTimeout(doTrack, 1);
