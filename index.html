@@ -52,7 +52,7 @@
         }
 
         if (!koala.supportsSVG()) {
-          track('Problemo', 'No SVG');
+          track('NoSVG', window.navigator.userAgent);
           alert("Sorry, KoalsToTheMax needs SVG support which your browser does not have. Supported browsers include Chrome, Safari, Firefox, Opera, and Internet Explorer 9");
           return;
         }
