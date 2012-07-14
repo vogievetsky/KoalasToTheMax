@@ -37,11 +37,15 @@
     </div>
     <script>
       (function() {
+        function supportsSVG() {
+          return !!document.createElementNS && !!document.createElementNS('http://www.w3.org/2000/svg', "svg").createSVGRect;
+        }
+
         function track(type, subtype) {}
 
-        if(/MSIE [3-8]/i.test(navigator.userAgent)) {
-          _gaq.push(['_trackEvent', 'Problemo', 'IE', window.location.href]);
-          alert("Sorry, Internet Explorer 8 (and bellow) is not supported, please get a modern browser like Safari, Chrome, Firefox or Internet Explorer 9");
+        if (supportsSVG()) {
+          _gaq.push(['_trackEvent', 'Problemo', 'No SVG', window.location.href]);
+          alert("Sorry, KoalsToTheMax needs SVG support which your browser does not have. Supported browsers include Chrome, Safari, Firefox, Opera, and Internet Explorer 9");
           return;
         }
 
