@@ -17,7 +17,7 @@ d3.svg.mouse = d3.mouse;
 var getCorrectScreenCTM;
 if (/WebKit/.test(navigator.userAgent)) {
   var d3_mouse_bug44083 = -1; // https://bugs.webkit.org/show_bug.cgi?id=44083
-  var d3_mouse_zoom_bug = -1; // ToDo: file bug report
+  var d3_mouse_zoom_bug = -1; // ToDo: file bug report?
   getCorrectScreenCTM = function(container, e) {
     var ctm,
         test_bug44083 = (d3_mouse_bug44083 < 0) && (window.pageXOffset || window.pageYOffset),
@@ -37,14 +37,11 @@ if (/WebKit/.test(navigator.userAgent)) {
         svg.style("top", 0).style("left", 0);
         ctm = svg[0][0].getScreenCTM();
         d3_mouse_bug44083 = !(ctm.f || ctm.e);
-        console.log('d3_mouse_bug44083', d3_mouse_bug44083);
       }
       if (test_zoom_bug) {
-        console.log(e.screenX - window.screenLeft, e.clientX)
         svg.style("left", "100px");
         ctm = svg[0][0].getScreenCTM();
         d3_mouse_zoom_bug = (ctm.e !== 100);
-        console.log('d3_mouse_zoom_bug', d3_mouse_zoom_bug);
       }
 
       svg.remove();
