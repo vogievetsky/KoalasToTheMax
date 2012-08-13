@@ -233,15 +233,10 @@ koala.loadImage = (function() {
     function touchFn() { return d3.svg.touches(vis.node()); }
 
     d3.select('body')
-      .on('mousemove', findAndSplit(mouseFn))
-      .on('touchmove', findAndSplit(touchFn));
+      .on('mousemove.koala', findAndSplit(mouseFn))
+      .on('touchmove.koala', findAndSplit(touchFn));
 
     // Create the initial circle
     addCircles([layer[[0,0]]], true);
   };
 })();
-
-
-
-
-
