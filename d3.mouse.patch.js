@@ -1,6 +1,18 @@
+/*
+Patch by Vadim Ogievetsky - 08/13/2012
+"vadimonusesgmail.com".replace(/uses/g, '@')
+
+This shim-like-code fixes the incorrect getScreenCTM that gets reported by WebKit when zoom != 1
+This 'fixes' the issues reported here:
+https://github.com/mbostock/d3/issues/668
+https://groups.google.com/d/topic/d3-js/tqJ_V7cV7Eg/discussion
+
+08/13/2012 - Code published as part of KoalasToTheMax.com and contacting Mike B. on getting this into d3 - Vadim
+*/
+
 (function(d3) {
 
-// Extracted so stuff works
+// Extracted from d3 so stuff works
 function d3_eventSource() {
   var e = d3.event, s;
   while (s = e.sourceEvent) e = s;
@@ -11,7 +23,7 @@ d3.mouse = function(container) {
   return d3_mousePoint(container, d3_eventSource());
 };
 
-// Extracted so stuff works
+// Extracted from d3 so stuff works
 d3.svg.mouse = d3.mouse;
 
 var getCorrectScreenCTM;
