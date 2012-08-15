@@ -60,16 +60,24 @@
         }
 
         try {
+          function utf8_to_b64(str) {
+            return window.btoa(unescape(encodeURIComponent(str)));
+          }
+
+          function b64_to_utf8(str) {
+            return decodeURIComponent(escape(window.atob(str)));
+          }
+
           var hrefSplit = window.location.href.split("?", 2);
           var domian = hrefSplit[0];
           var file = hrefSplit[1];
 
           if (file) {
             if (file.match(/^[a-z0-9+\/=]+$/i)) {
-              file = atob(file);
+              file = b64_to_utf8(file);
             } else {
               // Hide the link in the url
-              window.location.href = domian + '?' + btoa(file);
+              window.location.href = domian + '?' + utf8_to_b64(file);
             }
           } else {
             file = 'koalas0.jpg';
@@ -96,7 +104,7 @@
                       d3.select('#next div.msg').text('Thinking...');
                       d3.select(this).style('display', 'none');
                       setTimeout(function() {
-                        window.location.href = domian + '?' + btoa(input);
+                        window.location.href = domian + '?' + utf8_to_b64(input);
                       }, 750);
                     } else {
                       d3.select('#next').selectAll('div.err').data([0])
