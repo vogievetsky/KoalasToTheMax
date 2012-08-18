@@ -100,7 +100,7 @@
             file = 'koalas0.jpg';
           }
 
-          if (file.substring(0, 5) === 'http:') {
+          if (file.match(/^http:/) {
             file = "image-server.php?url=" + file;
           }
 
@@ -139,7 +139,7 @@
               var colorData = koala.loadImage(this);
               koala.makeCircles(colorData, onEvent);
             } catch (e) {
-              track('BadLoad', file);
+              track('BadLoad', "Msg: '" + e.message + "' file: '" + file + "'");
               alert("Sorry, KoalsToTheMax could not load the image '" + file + "'");
               setTimeout(function() {
                 window.location.href = domian;
@@ -148,8 +148,7 @@
           };
           img.src = file;
         } catch (e) {
-          track('Problemo', '[' + String(e.message) + ']');
-          throw e;
+          track('Problemo', String(e.message));
         }
       })();
     </script>
