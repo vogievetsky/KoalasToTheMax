@@ -61,7 +61,7 @@
 
         // If an error happens I want to know about it!
         window.onerror = function(message, url, linenumber) {
-          track('OnError', "Err '" + message + "' in '" + url + "' @ " + linenumber + " /u:'" + window.navigator.userAgent + "'");
+          track('OnError', "Er: '" + message + "' in '" + url + "' @ " + linenumber + " /u:'" + window.navigator.userAgent + "'");
         };
 
         if (!koala.supportsCanvas()) {
@@ -100,7 +100,7 @@
             file = 'koalas0.jpg';
           }
 
-          if (file.match(/^http:/) {
+          if (file.match(/^http:/)) {
             file = "image-server.php?url=" + file;
           }
 
