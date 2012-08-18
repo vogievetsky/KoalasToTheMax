@@ -8,11 +8,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <script src="polyfill/polyfill.js?1.4"></script>
-    <script src="d3.v2.min.js?1.4"></script>
-    <script src="d3.mouse.patch.js?1.4"></script>
-    <script src="koala.js?1.4"></script>
-    <link rel="stylesheet" type="text/css" href="koala.css?1.4"/>
+    <script type="text/javascript" src="polyfill/polyfill.js?1.5.2"></script>
+    <script type="text/javascript" src="d3.v2.min.js?1.5.2"></script>
+    <script type="text/javascript" src="d3.mouse.patch.js?1.5.2"></script>
+    <script type="text/javascript" src="koala.js?1.5.2"></script>
+    <link rel="stylesheet" type="text/css" href="koala.css?1.5.2"/>
   </head>
   <body>
     <div id="center">
@@ -37,7 +37,7 @@
       Powered by
       <a href="http://mbostock.github.com/d3">D3</a>
     </div>
-    <script>
+    <script type="text/javascript">
       // Code left intentionally unminimized for your reading pleasure.
 
       (function() {
@@ -57,8 +57,14 @@
 
         // If an error happens I want to know about it!
         window.onerror = function(message, url, linenumber) {
-          track('OnError', "JS error [" + message + "] in '" + url + "' @ " + linenumber);
+          track('OnError', "JS error [" + message + "] in '" + url + "' @ " + linenumber + " /h:'" + window.location.hash + "'");
         };
+
+        if (!koala.supportsCanvas()) {
+          track('NoCanvas', window.navigator.userAgent);
+          alert("Sorry, KoalsToTheMax needs HTML5 Canvas support which your browser does not have. Supported browsers include Chrome, Safari, Firefox, Opera, and Internet Explorer 9, 10");
+          return;
+        }
 
         if (!koala.supportsSVG()) {
           track('NoSVG', window.navigator.userAgent);
@@ -106,7 +112,7 @@
                     if (d3.event.keyCode !== 13) return;
                     var input = d3.select(this).property('value');
 
-                    if (input.match(/http:\/\/.+\..+/i)) {
+                    if (input.match(/^http:\/\/.+\..+/i)) {
                       track('Submit', input);
                       d3.select('#next div.msg').text('Thinking...');
                       d3.select(this).style('display', 'none');
@@ -124,7 +130,18 @@
           }
 
           var img = new Image();
-          img.onload = function() { koala.loadImage(this, onEvent); };
+          img.onload = function() {
+            try {
+              var colorData = koala.loadImage(this);
+              koala.makeCircles(colorData, onEvent);
+            } catch (e) {
+              track('BadLoad', file);
+              alert("Sorry, KoalsToTheMax could not load the image '" + file + "'");
+              setTimeout(function() {
+                window.location.href = domian;
+              }, 750);
+            }
+          };
           img.src = file;
         } catch (e) {
           track('Problemo', '[' + String(e.message) + ']');

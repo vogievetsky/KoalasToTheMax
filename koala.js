@@ -19,17 +19,38 @@
 */
 
 var koala = {
-  version: '1.4.0'
+  version: '1.5.2'
 };
+
+koala.supportsCanvas = function() {
+  var elem = document.createElement('canvas');
+  return !!(elem.getContext && elem.getContext('2d'));
+}
 
 koala.supportsSVG = function() {
   return !!document.createElementNS && !!document.createElementNS('http://www.w3.org/2000/svg', "svg").createSVGRect;
 };
 
-koala.loadImage = (function() {
+(function() {
   var vis,
       maxSize = 512,
-      minSize = 4;
+      minSize = 4,
+      dim = maxSize / minSize;
+
+  function array2d(w, h) {
+    var a = [];
+    return function(x, y, v) {
+      if (arguments.length === 3) {
+        // set
+        return a[w * x + y] = v;
+      } else if (arguments.length === 2) {
+        // get
+        return a[w * x + y];
+      } else {
+        throw "Bad number of arguments"
+      }
+    }
+  }
 
   // Find the color average of 4 colors in the RGB colorspace
   function avgCol(x, y, z, w) {
@@ -40,34 +61,14 @@ koala.loadImage = (function() {
     ];
   }
 
-  return function(imageData, onEvent) {
+  koala.loadImage = function(imageData) {
+    var canvas = document.createElement('canvas').getContext('2d');
+    canvas.drawImage(imageData, 0, 0, dim, dim);
+    return canvas.getImageData(0, 0, dim, dim).data;
+  }
+
+  koala.makeCircles = function(colorData, onEvent) {
     onEvent = onEvent || function() {};
-    var dim  = maxSize / minSize;
-    var canvas, data;
-
-    try {
-      canvas = document.createElement('canvas').getContext('2d');
-      canvas.drawImage(imageData, 0, 0, dim, dim);
-      data = canvas.getImageData(0, 0, dim, dim).data;
-    } catch(e) {
-      alert("Failed to load image.");
-      return;
-    }
-
-    function array2d(w, h) {
-      var a = [];
-      return function(x, y, v) {
-        if (arguments.length === 3) {
-          // set
-          return a[w * x + y] = v;
-        } else if (arguments.length === 2) {
-          // get
-          return a[w * x + y];
-        } else {
-          throw "Bad number of arguments"
-        }
-      }
-    }
 
     // Got the data now build the tree
     var prevLayer = array2d(dim, dim);
@@ -77,7 +78,7 @@ koala.loadImage = (function() {
 
     for (y = 0; y < dim; y++) {
       for (x = 0; x < dim; x++) {
-        col = [data[t], data[t+1], data[t+2]];
+        col = [colorData[t], colorData[t+1], colorData[t+2]];
         prevLayer(x, y, {
           x:   size * (x + .5),
           y:   size * (y + .5),
