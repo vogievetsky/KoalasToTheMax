@@ -40,18 +40,6 @@ koala.loadImage = (function() {
     ];
   }
 
-  function colToRGB(col) {
-    return 'rgb(' + col.map(Math.round).join(',') + ')';
-  }
-
-  // Some people tend to try and click the circles.
-  var numClicks = 0;
-  function onCircleClick() {
-    numClicks++;
-    if (numClicks !== 5) return;
-    //alert("You don't have to click, you can just mouse over. :-)");
-  }
-
   return function(imageData, onEvent) {
     onEvent = onEvent || function() {};
     var dim  = maxSize / minSize;
@@ -66,24 +54,37 @@ koala.loadImage = (function() {
       return;
     }
 
+    function array2d(w, h) {
+      var a = [];
+      return function(x, y, v) {
+        if (arguments.length === 3) {
+          // set
+          return a[w * x + y] = v;
+        } else if (arguments.length === 2) {
+          // get
+          return a[w * x + y];
+        } else {
+          throw "Bad number of arguments"
+        }
+      }
+    }
+
     // Got the data now build the tree
-    var prevLayer = {};
+    var prevLayer = array2d(dim, dim);
     var layer;
     var size = minSize;
-    var x, y, t, col;
+    var x, y, t = 0, col;
 
-
-    t = 0;
     for (y = 0; y < dim; y++) {
       for (x = 0; x < dim; x++) {
         col = [data[t], data[t+1], data[t+2]];
-        prevLayer[[x,y]] = {
+        prevLayer(x, y, {
           x:   size * (x + .5),
           y:   size * (y + .5),
           r:   size / 2,
           col: col,
-          rgb: colToRGB(col)
-        };
+          rgb: d3.rgb(col[0], col[1], col[2])
+        });
         t += 4;
       }
     }
@@ -98,23 +99,23 @@ koala.loadImage = (function() {
     while (size < maxSize) {
       dim /= 2;
       size = size * 2;
-      layer = {};
+      layer = array2d(dim, dim);
       for (y = 0; y < dim; y++) {
         for (x = 0; x < dim; x++) {
-          c1 = prevLayer[[2*x  , 2*y  ]];
-          c2 = prevLayer[[2*x+1, 2*y  ]];
-          c3 = prevLayer[[2*x  , 2*y+1]];
-          c4 = prevLayer[[2*x+1, 2*y+1]];
+          c1 = prevLayer(2*x  , 2*y  );
+          c2 = prevLayer(2*x+1, 2*y  );
+          c3 = prevLayer(2*x  , 2*y+1);
+          c4 = prevLayer(2*x+1, 2*y+1);
           col = avgCol(c1.col, c2.col, c3.col, c4.col);
-          layer[[x,y]] = c1.parent = c2.parent = c3.parent = c4.parent = {
+          c1.parent = c2.parent = c3.parent = c4.parent = layer(x, y, {
             x:   size * (x + .5),
             y:   size * (y + .5),
             r:   size / 2,
             col: col,
-            rgb: colToRGB(col),
+            rgb: d3.rgb(col[0], col[1], col[2]),
             children: [c1, c2, c3, c4],
             layer: activeLayerNumber
-          };
+          });
         }
       }
       activeLayerCount.push(dim * dim);
@@ -198,7 +199,7 @@ koala.loadImage = (function() {
     function findBase(pos) {
       var x = Math.floor(pos[0] / minSize),
           y = Math.floor(pos[1] / minSize),
-          base = grid[[x,y]];
+          base = grid(x, y);
       if (!base) return null;
       while (base && !base.node) base = base.parent;
       return base || null;
@@ -237,6 +238,6 @@ koala.loadImage = (function() {
       .on('touchmove.koala', findAndSplit(touchFn));
 
     // Create the initial circle
-    addCircles([layer[[0,0]]], true);
+    addCircles([layer(0, 0)], true);
   };
 })();
