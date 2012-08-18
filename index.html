@@ -22,7 +22,7 @@
         <div id="next" style="display: none">
           <div class="msg">
             Awesome stuff! Now make your own and share the link.<br/>
-            Paste an image url bellow and click enter.
+            Paste an image URL bellow and click enter.
           </div>
           <input placeholder="http://imgur.com/your_favourite_image.jpg"/>
         </div>
@@ -38,6 +38,8 @@
       <a href="http://mbostock.github.com/d3">D3</a>
     </div>
     <script>
+      // Code left intentionally unminimized for your reading pleasure.
+
       (function() {
         var now = Date.now();
         function track(type, subtype) {
@@ -52,6 +54,11 @@
             setTimeout(doTrack, 1);
           }
         }
+
+        // If an error happens I want to know about it!
+        window.onerror = function(message, url, linenumber) {
+          track('OnError', "JS error [" + message + "] in '" + url + "' @ " + linenumber);
+        };
 
         if (!koala.supportsSVG()) {
           track('NoSVG', window.navigator.userAgent);
