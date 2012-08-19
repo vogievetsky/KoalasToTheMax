@@ -81,7 +81,7 @@
           return;
         }
 
-        if (!d3) {
+        if (!window.d3) {
           track('NoD3', window.navigator.userAgent);
           alert("Some how D3 was not loaded so the site can not start. This is bad... We are investigating. Try refreshing the page and see if that helps.");
           return;
