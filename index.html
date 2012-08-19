@@ -59,14 +59,16 @@
           }
         }
 
-        var version = '1.5.3';
+        var version = '1.5.4';
 
         // If an error happens I want to know about it!
-        var onErrorSent = false;
-        window.onerror = function(message, url, linenumber) {
-          if (onErrorSent) return;
-          track('OnError-' + version, "'" + message + "' in '" + url + "' @ " + linenumber + " /u:'" + window.navigator.userAgent + "'");
-          onErrorSent = true;
+        window.onerror = function(msg, url, ln) {
+          msg = msg.toString();
+          // In Chrome and Firefox an error on a script form a foreign domain will cause this, see link bellow:
+          // http://stackoverflow.com/questions/5913978/cryptic-script-error-reported-in-javascript-in-chrome-and-firefox
+          if (msg === 'Script error.' && url === '' && ln === 0) return;
+          track('OnError-' + version, "'" + msg + "' in '" + url + "' @ " + ln + " /u:'" + window.navigator.userAgent + "'");
+          window.onerror = function() {};
         };
 
         if (!koala.supportsCanvas()) {
