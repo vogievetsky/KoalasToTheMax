@@ -59,9 +59,11 @@
           }
         }
 
+        var version = '1.5.2';
+
         // If an error happens I want to know about it!
         window.onerror = function(message, url, linenumber) {
-          track('OnError', "Er: '" + message + "' in '" + url + "' @ " + linenumber + " /u:'" + window.navigator.userAgent + "'");
+          track('OnError-' + version, "'" + message + "' in '" + url + "' @ " + linenumber + " /u:'" + window.navigator.userAgent + "'");
         };
 
         if (!koala.supportsCanvas()) {
