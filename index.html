@@ -78,6 +78,12 @@
           return;
         }
 
+        if (!d3) {
+          track('NoD3', window.navigator.userAgent);
+          alert("Some how D3 was not loaded so the site can not start. This is bad... We are investigating. Try refreshing the page and see if that helps.");
+          return;
+        }
+
         try {
           function utf8_to_b64(str) {
             return window.btoa(unescape(encodeURIComponent(str)));
@@ -137,15 +143,19 @@
 
           var img = new Image();
           img.onload = function() {
+            var colorData;
             try {
-              var colorData = koala.loadImage(this);
-              koala.makeCircles(colorData, onEvent);
+              colorData = koala.loadImage(this);
             } catch (e) {
-              track('BadLoad', "Msg: '" + e.message + "' file: '" + file + "'");
+              colorData = null;
+              track('BadLoad-' + version, "Msg: '" + e.message + "' file: '" + file + "'");
               alert("Sorry, KoalsToTheMax could not load the image '" + file + "'");
               setTimeout(function() {
                 window.location.href = domian;
               }, 750);
+            }
+            if (colorData) {
+              koala.makeCircles(colorData, onEvent);
             }
           };
           img.src = file;
