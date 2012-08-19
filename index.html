@@ -59,11 +59,14 @@
           }
         }
 
-        var version = '1.5.2';
+        var version = '1.5.3';
 
         // If an error happens I want to know about it!
+        var onErrorSent = false;
         window.onerror = function(message, url, linenumber) {
+          if (onErrorSent) return;
           track('OnError-' + version, "'" + message + "' in '" + url + "' @ " + linenumber + " /u:'" + window.navigator.userAgent + "'");
+          onErrorSent = true;
         };
 
         if (!koala.supportsCanvas()) {
