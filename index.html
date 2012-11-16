@@ -50,7 +50,7 @@
         var initTime = +new Date();
         window.flextrack = function(a) {
           if (Object.prototype.toString.call(a) != '[object Object]') return false;
-          c.N_ = num++;
+          a.N_ = num++;
           a.P_ = document.location.pathname;
           a.S_ = +new Date() - initTime;
           a.R_ = document.referrer || 'Direct';
@@ -60,6 +60,7 @@
           i.src = 'http://tracking.metamx.com/m.gif?' + params.join('&');
           return true;
         };
+      } catch (e) {}
     })();
     </script>
     <script type="text/javascript">
@@ -87,7 +88,7 @@
           }
         }
 
-        var version = '1.5.4';
+        var version = '1.6.0';
 
         // If an error happens I want to know about it!
         window.onerror = function(msg, url, ln) {
@@ -139,8 +140,9 @@
             }
             shownFile = 'CUSTOM';
           } else {
-            file = 'img/koalas.jpg';
-            shownFile = file.replace('/img', '').replace('.jpg', '');
+            var possible = ['dog', 'kitten', 'koalas', 'lion', 'otter', 'owls', 'pandas'];
+            shownFile = possible[Math.floor(Math.random() * possible.length)];
+            file = 'img/' + shownFile + '.jpg';
           }
 
           if (file.match(/^http:/)) {
