@@ -23,20 +23,20 @@ if (!Object.getPrototypeOf) {
   };
 }
 
-//    // ES5 15.2.3.3 Object.getOwnPropertyDescriptor ( O, P )
-//    if (typeof Object.getOwnPropertyDescriptor !== "function") {
-//        Object.getOwnPropertyDescriptor = function (o, name) {
-//            if (o !== Object(o)) { throw new TypeError(); }
-//            if (o.hasOwnProperty(name)) {
-//                return {
-//                    value: o[name],
-//                    enumerable: true,
-//                    writable: true,
-//                    configurable: true
-//                };
-//            }
-//        };
-//    }
+// ES5 15.2.3.3 Object.getOwnPropertyDescriptor ( O, P )
+if (!Object.getOwnPropertyDescriptor) {
+  Object.getOwnPropertyDescriptor = function (o, name) {
+    if (o !== Object(o)) { throw new TypeError("Object.getOwnPropertyDescriptor called on non-object"); }
+    if (o.hasOwnProperty(name)) {
+      return {
+        value: o[name],
+        enumerable: true,
+        writable: true,
+        configurable: true
+      };
+    }
+  };
+}
 
 // ES5 15.2.3.4 Object.getOwnPropertyNames ( O )
 if (typeof Object.getOwnPropertyNames !== "function") {
@@ -53,7 +53,7 @@ if (typeof Object.getOwnPropertyNames !== "function") {
 }
 
 // ES5 15.2.3.5 Object.create ( O [, Properties] )
-if (typeof Object.create !== "function") {
+if (!Object.create) {
   Object.create = function (prototype, properties) {
     "use strict";
     if (prototype !== Object(prototype)) { throw new TypeError(); }
@@ -91,13 +91,13 @@ if (!Object.defineProperty ||
 }
 
 // ES 15.2.3.7 Object.defineProperties ( O, Properties )
-if (typeof Object.defineProperties !== "function") {
+if (!Object.defineProperties) {
   Object.defineProperties = function (o, properties) {
     "use strict";
     if (o !== Object(o)) { throw new TypeError("Object.defineProperties called on non-object"); }
-    var name;
+    var name, hasOwnProperty = Object.prototype.hasOwnProperty;
     for (name in properties) {
-      if (Object.prototype.hasOwnProperty.call(properties, name)) {
+      if (hasOwnProperty.call(properties, name)) {
         Object.defineProperty(o, name, properties[name]);
       }
     }
@@ -164,7 +164,11 @@ if (!Function.prototype.bind) {
 
 // ES5 15.4.3.2 Array.isArray ( arg )
 // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/isArray
-Array.isArray = Array.isArray || function (o) { return Boolean(o && Object.prototype.toString.call(Object(o)) === '[object Array]'); };
+if (!Array.isArray) {
+  Array.isArray = function (a) {
+    return Object.prototype.toString.call(a) === "[object Array]";
+  };
+}
 
 
 //
@@ -242,20 +246,21 @@ if (!Array.prototype.lastIndexOf) {
 // ES5 15.4.4.16 Array.prototype.every ( callbackfn [ , thisArg ] )
 // From https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/every
 if (!Array.prototype.every) {
-  Array.prototype.every = function (fun /*, thisp */) {
+  Array.prototype.every = function(fun /*, thisp */) {
     "use strict";
 
-    if (this === void 0 || this === null) { throw new TypeError(); }
+    if (this == null)
+      throw new TypeError("Array.prototype.every called on null or undefined");
 
     var t = Object(this);
     var len = t.length >>> 0;
-    if (typeof fun !== "function") { throw new TypeError(); }
+    if (typeof fun != "function")
+      throw new TypeError(String(fun) + " is not a function");
 
-    var thisp = arguments[1], i;
-    for (i = 0; i < len; i++) {
-      if (i in t && !fun.call(thisp, t[i], i, t)) {
+    var thisp = arguments[1];
+    for (var i = 0; i < len; i++) {
+      if (i in t && !fun.call(thisp, t[i], i, t))
         return false;
-      }
     }
 
     return true;
@@ -268,11 +273,13 @@ if (!Array.prototype.some) {
   Array.prototype.some = function (fun /*, thisp */) {
     "use strict";
 
-    if (this === void 0 || this === null) { throw new TypeError(); }
+    if (this == null)
+      throw new TypeError("Array.prototype.some called on null or undefined");
 
     var t = Object(this);
     var len = t.length >>> 0;
-    if (typeof fun !== "function") { throw new TypeError(); }
+    if (typeof fun != "function")
+      throw new TypeError(String(fun) + " is not a function");
 
     var thisp = arguments[1], i;
     for (i = 0; i < len; i++) {
@@ -291,11 +298,13 @@ if (!Array.prototype.forEach) {
   Array.prototype.forEach = function (fun /*, thisp */) {
     "use strict";
 
-    if (this === void 0 || this === null) { throw new TypeError(); }
+    if (this == null)
+      throw new TypeError("Array.prototype.forEach called on null or undefined");
 
     var t = Object(this);
     var len = t.length >>> 0;
-    if (typeof fun !== "function") { throw new TypeError(); }
+    if (typeof fun != "function")
+      throw new TypeError(String(fun) + " is not a function");
 
     var thisp = arguments[1], i;
     for (i = 0; i < len; i++) {
@@ -313,11 +322,13 @@ if (!Array.prototype.map) {
   Array.prototype.map = function (fun /*, thisp */) {
     "use strict";
 
-    if (this === void 0 || this === null) { throw new TypeError(); }
+    if (this == null)
+      throw new TypeError("Array.prototype.map called on null or undefined");
 
     var t = Object(this);
     var len = t.length >>> 0;
-    if (typeof fun !== "function") { throw new TypeError(); }
+    if (typeof fun != "function")
+      throw new TypeError(String(fun) + " is not a function");
 
     var res = []; res.length = len;
     var thisp = arguments[1], i;
@@ -337,11 +348,13 @@ if (!Array.prototype.filter) {
   Array.prototype.filter = function (fun /*, thisp */) {
     "use strict";
 
-    if (this === void 0 || this === null) { throw new TypeError(); }
+    if (this == null)
+      throw new TypeError("Array.prototype.filter called on null or undefined");
 
     var t = Object(this);
     var len = t.length >>> 0;
-    if (typeof fun !== "function") { throw new TypeError(); }
+    if (typeof fun != "function")
+      throw new TypeError(String(fun) + " is not a function");
 
     var res = [];
     var thisp = arguments[1], i;
@@ -365,11 +378,13 @@ if (!Array.prototype.reduce) {
   Array.prototype.reduce = function (fun /*, initialValue */) {
     "use strict";
 
-    if (this === void 0 || this === null) { throw new TypeError(); }
+    if (this == null)
+      throw new TypeError("Array.prototype.reduce called on null or undefined");
 
     var t = Object(this);
     var len = t.length >>> 0;
-    if (typeof fun !== "function") { throw new TypeError(); }
+    if (typeof fun != "function")
+      throw new TypeError(String(fun) + " is not a function");
 
     // no value to return if no initial value and an empty array
     if (len === 0 && arguments.length === 1) { throw new TypeError(); }
@@ -406,14 +421,16 @@ if (!Array.prototype.reduce) {
 // ES5 15.4.4.22 Array.prototype.reduceRight ( callbackfn [, initialValue ] )
 // From https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/ReduceRight
 if (!Array.prototype.reduceRight) {
-  Array.prototype.reduceRight = function (callbackfn /*, initialValue */) {
+  Array.prototype.reduceRight = function (fun /*, initialValue */) {
     "use strict";
 
-    if (this === void 0 || this === null) { throw new TypeError(); }
+    if (this == null)
+      throw new TypeError("Array.prototype.reduceRight called on null or undefined");
 
     var t = Object(this);
     var len = t.length >>> 0;
-    if (typeof callbackfn !== "function") { throw new TypeError(); }
+    if (typeof fun != "function")
+      throw new TypeError(String(fun) + " is not a function");
 
     // no value to return if no initial value, empty array
     if (len === 0 && arguments.length === 1) { throw new TypeError(); }
@@ -437,7 +454,7 @@ if (!Array.prototype.reduceRight) {
 
     while (k >= 0) {
       if (k in t) {
-        accumulator = callbackfn.call(undefined, accumulator, t[k], k, t);
+        accumulator = fun.call(undefined, accumulator, t[k], k, t);
       }
       k--;
     }
@@ -507,48 +524,6 @@ if (!Date.prototype.toISOString) {
 
 //----------------------------------------------------------------------
 //
-// Non-standard JavaScript (Mozilla) functions
-//
-//----------------------------------------------------------------------
-
-(function () {
-  // JavaScript 1.8.1
-  String.prototype.trimLeft = String.prototype.trimLeft || function () {
-    return String(this).replace(/^\s+/, '');
-  };
-
-  // JavaScript 1.8.1
-  String.prototype.trimRight = String.prototype.trimRight || function () {
-    return String(this).replace(/\s+$/, '');
-  };
-
-  // JavaScript 1.?
-  var ESCAPES = {
-    //'\x00': '\\0', Special case in FF3.6, removed by FF10
-    '\b': '\\b',
-    '\t': '\\t',
-    '\n': '\\n',
-    '\f': '\\f',
-    '\r': '\\r',
-    '"' : '\\"',
-    '\\': '\\\\'
-  };
-  String.prototype.quote = String.prototype.quote || function() {
-    return '"' + String(this).replace(/[\x00-\x1F"\\\x7F-\uFFFF]/g, function(c) {
-      if (Object.prototype.hasOwnProperty.call(ESCAPES, c)) {
-        return ESCAPES[c];
-      } else if (c.charCodeAt(0) <= 0xFF) {
-        return '\\x' + ('00' + c.charCodeAt(0).toString(16).toUpperCase()).slice(-2);
-      } else {
-        return '\\u' + ('0000' + c.charCodeAt(0).toString(16).toUpperCase()).slice(-4);
-      }
-    }) + '"';
-  };
-}());
-
-
-//----------------------------------------------------------------------
-//
 // Browser Polyfills
 //
 //----------------------------------------------------------------------
@@ -565,60 +540,31 @@ if ('window' in this && 'document' in this) {
   //
   // document.head (HTML5)
   //
-  document.head = document.head || document.getElementsByTagName('head')[0];
+  if (!document.head) {
+    document.head = document.getElementsByTagName('head')[0];
+  }
 
   //
   // XMLHttpRequest (http://www.w3.org/TR/XMLHttpRequest/)
   //
-  window.XMLHttpRequest = window.XMLHttpRequest || function () {
-    /*global ActiveXObject*/
-    try { return new ActiveXObject("Msxml2.XMLHTTP.6.0"); } catch (e1) { }
-    try { return new ActiveXObject("Msxml2.XMLHTTP.3.0"); } catch (e2) { }
-    try { return new ActiveXObject("Msxml2.XMLHTTP"); } catch (e3) { }
-    throw new Error("This browser does not support XMLHttpRequest.");
-  };
-  XMLHttpRequest.UNSENT = 0;
-  XMLHttpRequest.OPENED = 1;
-  XMLHttpRequest.HEADERS_RECEIVED = 2;
-  XMLHttpRequest.LOADING = 3;
-  XMLHttpRequest.DONE = 4;
+  if (!window.XMLHttpRequest) {
+    window.XMLHttpRequest = function () {
+      /*global ActiveXObject*/
+      try { return new ActiveXObject("Msxml2.XMLHTTP.6.0"); } catch (e1) { }
+      try { return new ActiveXObject("Msxml2.XMLHTTP.3.0"); } catch (e2) { }
+      try { return new ActiveXObject("Msxml2.XMLHTTP"); } catch (e3) { }
+      throw new Error("This browser does not support XMLHttpRequest.");
+    };
+    XMLHttpRequest.UNSENT = 0;
+    XMLHttpRequest.OPENED = 1;
+    XMLHttpRequest.HEADERS_RECEIVED = 2;
+    XMLHttpRequest.LOADING = 3;
+    XMLHttpRequest.DONE = 4;
+  }
 
   if (!window.BlobBuilder) {
     window.BlobBuilder = window.WebKitBlobBuilder || window.MozBlobBuilder;
   }
-
-
-  //----------------------------------------------------------------------
-  //
-  // Performance (see also: raf.js)
-  //
-  //----------------------------------------------------------------------
-
-  // setImmediate
-  // https://dvcs.w3.org/hg/webperf/raw-file/tip/specs/setImmediate/Overview.html
-  (function () {
-    function setImmediate(callback, args) {
-      var params = [callback, 0], i;
-      for (i = 1; i < arguments.length; i += 1) {
-        params.push(arguments[i]);
-      }
-      return window.setTimeout.apply(null, params);
-    }
-
-    function clearImmediate(handle) {
-      window.clearTimeout(handle);
-    }
-
-    window.setImmediate =
-      window.setImmediate ||
-      window.msSetImmediate ||
-      setImmediate;
-
-    window.clearImmediate =
-      window.clearImmediate ||
-      window.msClearImmediate ||
-      clearImmediate;
-  } ());
 
   //----------------------------------------------------------------------
   //
@@ -668,74 +614,41 @@ if ('window' in this && 'document' in this) {
   //
   // DOM Enumerations (http://www.w3.org/TR/DOM-Level-2-Core/)
   //
-  window.Node = window.Node || function Node() { throw new Error("Illegal constructor"); };
-  window.Node.ELEMENT_NODE = 1;
-  window.Node.ATTRIBUTE_NODE = 2;
-  window.Node.TEXT_NODE = 3;
-  window.Node.CDATA_SECTION_NODE = 4;
-  window.Node.ENTITY_REFERENCE_NODE = 5;
-  window.Node.ENTITY_NODE = 6;
-  window.Node.PROCESSING_INSTRUCTION_NODE = 7;
-  window.Node.COMMENT_NODE = 8;
-  window.Node.DOCUMENT_NODE = 9;
-  window.Node.DOCUMENT_TYPE_NODE = 10;
-  window.Node.DOCUMENT_FRAGMENT_NODE = 11;
-  window.Node.NOTATION_NODE = 12;
+  if (!window.Node) {
+    window.Node = function Node() { throw new TypeError("Illegal constructor"); };
+    window.Node.ELEMENT_NODE = 1;
+    window.Node.ATTRIBUTE_NODE = 2;
+    window.Node.TEXT_NODE = 3;
+    window.Node.CDATA_SECTION_NODE = 4;
+    window.Node.ENTITY_REFERENCE_NODE = 5;
+    window.Node.ENTITY_NODE = 6;
+    window.Node.PROCESSING_INSTRUCTION_NODE = 7;
+    window.Node.COMMENT_NODE = 8;
+    window.Node.DOCUMENT_NODE = 9;
+    window.Node.DOCUMENT_TYPE_NODE = 10;
+    window.Node.DOCUMENT_FRAGMENT_NODE = 11;
+    window.Node.NOTATION_NODE = 12;
+  }
 
-  window.DOMException = window.DOMException || function DOMException() { throw new Error("Illegal constructor"); };
-  window.DOMException.INDEX_SIZE_ERR = 1;
-  window.DOMException.DOMSTRING_SIZE_ERR = 2;
-  window.DOMException.HIERARCHY_REQUEST_ERR = 3;
-  window.DOMException.WRONG_DOCUMENT_ERR = 4;
-  window.DOMException.INVALID_CHARACTER_ERR = 5;
-  window.DOMException.NO_DATA_ALLOWED_ERR = 6;
-  window.DOMException.NO_MODIFICATION_ALLOWED_ERR = 7;
-  window.DOMException.NOT_FOUND_ERR = 8;
-  window.DOMException.NOT_SUPPORTED_ERR = 9;
-  window.DOMException.INUSE_ATTRIBUTE_ERR = 10;
-  window.DOMException.INVALID_STATE_ERR = 11;
-  window.DOMException.SYNTAX_ERR = 12;
-  window.DOMException.INVALID_MODIFICATION_ERR = 13;
-  window.DOMException.NAMESPACE_ERR = 14;
-  window.DOMException.INVALID_ACCESS_ERR = 15;
+  if (!window.DOMException) {
+    window.DOMException = function DOMException() { throw new TypeError("Illegal constructor"); };
+    window.DOMException.INDEX_SIZE_ERR = 1;
+    window.DOMException.DOMSTRING_SIZE_ERR = 2;
+    window.DOMException.HIERARCHY_REQUEST_ERR = 3;
+    window.DOMException.WRONG_DOCUMENT_ERR = 4;
+    window.DOMException.INVALID_CHARACTER_ERR = 5;
+    window.DOMException.NO_DATA_ALLOWED_ERR = 6;
+    window.DOMException.NO_MODIFICATION_ALLOWED_ERR = 7;
+    window.DOMException.NOT_FOUND_ERR = 8;
+    window.DOMException.NOT_SUPPORTED_ERR = 9;
+    window.DOMException.INUSE_ATTRIBUTE_ERR = 10;
+    window.DOMException.INVALID_STATE_ERR = 11;
+    window.DOMException.SYNTAX_ERR = 12;
+    window.DOMException.INVALID_MODIFICATION_ERR = 13;
+    window.DOMException.NAMESPACE_ERR = 14;
+    window.DOMException.INVALID_ACCESS_ERR = 15;
+  }
 
-  //----------------------------------------------------------------------
-  //
-  // Events
-  //
-  //----------------------------------------------------------------------
-
-  // Shim for DOM Events
-  // http://www.quirksmode.org/blog/archives/2005/10/_and_the_winner_1.html
-  // Use addEvent(object, event, handler) instead of object.addEventListener(event, handler)
-
-  window.addEvent = function (obj, type, fn) {
-    if (obj.addEventListener) {
-      obj.addEventListener(type, fn, false);
-    } else if (obj.attachEvent) {
-      obj["e" + type + fn] = fn;
-      obj[type + fn] = function () {
-        var e = window.event;
-        e.currentTarget = obj;
-        e.preventDefault = function () { e.returnValue = false; };
-        e.stopPropagation = function () { e.cancelBubble = true; };
-        e.target = e.srcElement;
-        e.timeStamp = new Date();
-        obj["e" + type + fn].call(this, e);
-      };
-      obj.attachEvent("on" + type, obj[type + fn]);
-    }
-  };
-
-  window.removeEvent = function (obj, type, fn) {
-    if (obj.removeEventListener) {
-      obj.removeEventListener(type, fn, false);
-    } else if (obj.detachEvent) {
-      obj.detachEvent("on" + type, obj[type + fn]);
-      obj[type + fn] = null;
-      obj["e" + type + fn] = null;
-    }
-  };
 
   //----------------------------------------------------------------------
   //
@@ -877,85 +790,89 @@ if ('window' in this && 'document' in this) {
       addToElementPrototype('relList', window.getRelList);
     }
   }());
-}
 
-//
-// Base64 utility methods (HTML5)
-//
-(function (global) {
+  //
+  // Base64 utility methods (HTML5)
+  //
+
   /*jslint plusplus: true, bitwise: true*/
-  var B64_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-  global.atob = global.atob || function (input) {
-    input = String(input);
-    var position = 0,
-        output = [],
-        buffer = 0, bits = 0, n;
+  if (!window.atob) {
+    window.atob = function atob(input) {
+      var B64_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+      input = String(input);
+      var position = 0,
+          output = [],
+          buffer = 0, bits = 0, n;
 
-    input = input.replace(/\s/g, '');
-    if ((input.length % 4) === 0) { input = input.replace(/=+$/, ''); }
-    if ((input.length % 4) === 1) { throw new Error("InvalidCharacterError"); }
-    if (/[^+/0-9A-Za-z]/.test(input)) { throw new Error("InvalidCharacterError"); }
+      input = input.replace(/\s/g, '');
+      if ((input.length % 4) === 0) { input = input.replace(/=+$/, ''); }
+      if ((input.length % 4) === 1) { throw new Error("InvalidCharacterError"); }
+      if (/[^+/0-9A-Za-z]/.test(input)) { throw new Error("InvalidCharacterError"); }
 
-    while (position < input.length) {
-      n = B64_ALPHABET.indexOf(input.charAt(position));
-      buffer = (buffer << 6) | n;
-      bits += 6;
+      while (position < input.length) {
+        n = B64_ALPHABET.indexOf(input.charAt(position));
+        buffer = (buffer << 6) | n;
+        bits += 6;
 
-      if (bits === 24) {
-        output.push(String.fromCharCode((buffer >> 16) & 0xFF));
-        output.push(String.fromCharCode((buffer >>  8) & 0xFF));
+        if (bits === 24) {
+          output.push(String.fromCharCode((buffer >> 16) & 0xFF));
+          output.push(String.fromCharCode((buffer >>  8) & 0xFF));
+          output.push(String.fromCharCode(buffer & 0xFF));
+          bits = 0;
+          buffer = 0;
+        }
+        position += 1;
+      }
+
+      if (bits === 12) {
+        buffer = buffer >> 4;
         output.push(String.fromCharCode(buffer & 0xFF));
-        bits = 0;
-        buffer = 0;
-      }
-      position += 1;
-    }
-
-    if (bits === 12) {
-      buffer = buffer >> 4;
-      output.push(String.fromCharCode(buffer & 0xFF));
-    } else if (bits === 18) {
-      buffer = buffer >> 2;
-      output.push(String.fromCharCode((buffer >> 8) & 0xFF));
-      output.push(String.fromCharCode(buffer & 0xFF));
-    }
-
-    return output.join('');
-  };
-
-  global.btoa = global.btoa || function (input) {
-    input = String(input);
-    var position = 0,
-        out = [],
-        o1, o2, o3,
-        e1, e2, e3, e4;
-
-    if (/[^\x00-\xFF]/.test(input)) { throw new Error("InvalidCharacterError"); }
-
-    while (position < input.length) {
-      o1 = input.charCodeAt(position++);
-      o2 = input.charCodeAt(position++);
-      o3 = input.charCodeAt(position++);
-
-      // 111111 112222 222233 333333
-      e1 = o1 >> 2;
-      e2 = ((o1 & 0x3) << 4) | (o2 >> 4);
-      e3 = ((o2 & 0xf) << 2) | (o3 >> 6);
-      e4 = o3 & 0x3f;
-
-      if (position === input.length + 2) {
-        e3 = 64; e4 = 64;
-      }
-      else if (position === input.length + 1) {
-        e4 = 64;
+      } else if (bits === 18) {
+        buffer = buffer >> 2;
+        output.push(String.fromCharCode((buffer >> 8) & 0xFF));
+        output.push(String.fromCharCode(buffer & 0xFF));
       }
 
-      out.push(B64_ALPHABET.charAt(e1),
-               B64_ALPHABET.charAt(e2),
-               B64_ALPHABET.charAt(e3),
-               B64_ALPHABET.charAt(e4));
-    }
+      return output.join('');
+    };
+  }
 
-    return out.join('');
-  };
-} (this));
+  if (!window.btoa) {
+    window.btoa = function btoa(input) {
+      var B64_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+      input = String(input);
+      var position = 0,
+          out = [],
+          o1, o2, o3,
+          e1, e2, e3, e4;
+
+      if (/[^\x00-\xFF]/.test(input)) { throw new Error("InvalidCharacterError"); }
+
+      while (position < input.length) {
+        o1 = input.charCodeAt(position++);
+        o2 = input.charCodeAt(position++);
+        o3 = input.charCodeAt(position++);
+
+        // 111111 112222 222233 333333
+        e1 = o1 >> 2;
+        e2 = ((o1 & 0x3) << 4) | (o2 >> 4);
+        e3 = ((o2 & 0xf) << 2) | (o3 >> 6);
+        e4 = o3 & 0x3f;
+
+        if (position === input.length + 2) {
+          e3 = 64; e4 = 64;
+        }
+        else if (position === input.length + 1) {
+          e4 = 64;
+        }
+
+        out.push(B64_ALPHABET.charAt(e1),
+                 B64_ALPHABET.charAt(e2),
+                 B64_ALPHABET.charAt(e3),
+                 B64_ALPHABET.charAt(e4));
+      }
+
+      return out.join('');
+    };
+  }
+}

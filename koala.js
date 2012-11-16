@@ -4,6 +4,9 @@
 * Made with love by Vadim Ogievetsky for Annie Albagli (Valentine's Day 2011)
 * Powered by Mike Bostock's D3
 *
+* For me on GitHub:  https://github.com/vogievetsky/KoalasToTheMax
+* License: MIT  [ http://koalastothemax.com/LICENSE ]
+*
 * If you are reading this then I have an easter egg for you:
 * You can use your own custom image as the source, simply type in:
 * http://koalastothemax.com?<your image url>

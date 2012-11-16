@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title>Koalas to the Max dot Com</title>
     <meta name="description" content="Koalas to the Max, a site made with love by Vadim Ogievetsky for Annie Albagli">
     <meta name="keywords" content="Koalas Max Vadim Ogievetsky Annie Albagli D3 Canvas SVG Koala Maximization">
@@ -43,15 +44,41 @@
       <a href="http://mbostock.github.com/d3">D3</a>
     </div>
     <script type="text/javascript">
+    (function() {
+      try {
+        var num = 0;
+        var initTime = +new Date();
+        window.flextrack = function(a) {
+          if (Object.prototype.toString.call(a) != '[object Object]') return false;
+          c.N_ = num++;
+          a.P_ = document.location.pathname;
+          a.S_ = +new Date() - initTime;
+          a.R_ = document.referrer || 'Direct';
+          var params = [];
+          for (var k in a) params.push(encodeURIComponent(k) + "=" + encodeURIComponent(String(a[k])));
+          var i = new Image();
+          i.src = 'http://tracking.metamx.com/m.gif?' + params.join('&');
+          return true;
+        };
+    })();
+    </script>
+    <script type="text/javascript">
       // Code left intentionally unminimized for your reading pleasure.
 
       (function() {
+        var shownFile = 'none';
+
         var now = Date.now();
         function track(type, subtype) {
           var time = Math.round((Date.now() - now) / 1000);
           function doTrack() {
             if (!window._gaq) return;
             _gaq.push(['_trackEvent', String(type), String(subtype), window.location.href, time]);
+            flextrack({
+              Type: type,
+              SybType: subtype,
+              File: shownFile
+            });
           }
           if (window._gaq) {
             doTrack()
@@ -110,8 +137,10 @@
               // Hide the link in the url
               window.location.href = domian + '?' + utf8_to_b64(file);
             }
+            shownFile = 'CUSTOM';
           } else {
-            file = 'koalas0.jpg';
+            file = 'img/koalas.jpg';
+            shownFile = file.replace('/img', '').replace('.jpg', '');
           }
 
           if (file.match(/^http:/)) {
@@ -162,6 +191,7 @@
             }
             if (colorData) {
               koala.makeCircles(colorData, onEvent);
+              track('GoodLoad-' + version, 'Yay');
             }
           };
           img.src = file;
