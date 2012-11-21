@@ -2,19 +2,21 @@
 <html>
   <head>
     <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>Koalas to the Max dot Com</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
     <meta name="description" content="Koalas to the Max, a site made with love by Vadim Ogievetsky for Annie Albagli">
     <meta name="keywords" content="Koalas Max Vadim Ogievetsky Annie Albagli D3 Canvas SVG Koala Maximization">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="google" content="notranslate">
-    <script type="text/javascript" src="polyfill/polyfill.js?1.5.2"></script>
-    <script type="text/javascript" src="d3.v2.min.js?1.5.2"></script>
-    <script type="text/javascript" src="d3.mouse.patch.js?1.5.2"></script>
-    <script type="text/javascript" src="koala.js?1.5.2"></script>
-    <link rel="stylesheet" type="text/css" href="koala.css?1.5.2"/>
+    <title>Koalas to the Max dot Com</title>
+    <script type="text/javascript" src="polyfill/polyfill.js?1.6.1"></script>
+    <!--[if gte IE 9]><!-->
+    <script type="text/javascript" src="d3.v2.min.js?1.6.1"></script>
+    <script type="text/javascript" src="d3.mouse.patch.js?1.6.1"></script>
+    <script type="text/javascript" src="koala.js?1.6.1"></script>
+    <!--<![endif]-->
+    <link rel="stylesheet" type="text/css" href="koala.css?1.6.1"/>
   </head>
   <body>
     <div id="center">
@@ -43,7 +45,9 @@
       Powered by
       <a href="http://mbostock.github.com/d3">D3</a>
     </div>
+
     <script type="text/javascript">
+    // FlexTrack
     (function() {
       try {
         var num = 0;
@@ -63,23 +67,31 @@
       } catch (e) {}
     })();
     </script>
+
     <script type="text/javascript">
-      // Code left intentionally unminimized for your reading pleasure.
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-17409200-2']);
+      _gaq.push(['_trackPageview']);
 
       (function() {
-        var shownFile = 'none';
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
 
-        var now = Date.now();
-        function track(type, subtype) {
-          var time = Math.round((Date.now() - now) / 1000);
+    </script>
+
+    <script type="text/javascript">
+      window.shownFile = 'none';
+
+      (function() {
+        var now = +new Date();
+        window.gaTrack = function(type, subtype) {
+          var time = Math.round((+new Date() - now) / 1000);
           function doTrack() {
             if (!window._gaq) return;
             _gaq.push(['_trackEvent', String(type), String(subtype), window.location.href, time]);
-            flextrack({
-              Type: type,
-              SybType: subtype,
-              File: shownFile
-            });
           }
           if (window._gaq) {
             doTrack()
@@ -87,8 +99,58 @@
             setTimeout(doTrack, 1);
           }
         }
+      })();
 
-        var version = '1.6.0';
+      function track(type, subtype) {
+        flextrack({
+          Type: type,
+          SybType: subtype,
+          File: shownFile
+        });
+        gaTrack(type, subtype);
+      }
+    </script>
+
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js"></script>
+
+    <style>
+      .chromeFrameInstallDefaultStyle {
+        width: 800px;
+        height: 600px;
+        border: 1px solid #cccccc;
+      }
+    </style>
+
+    <div id="prompt">
+    </div>
+
+    <script>
+      window.inOldIE = true;
+      track('OldIE', '1');
+
+      // The conditional ensures that this code will only execute in IE,
+      // Therefore we can use the IE-specific attachEvent without worry
+      window.attachEvent("onload", function() {
+        CFInstall.check({
+          mode: "inline", // the default
+          node: "prompt",
+          oninstall: function() {
+            track('InstalledGCF', 'OneLessRawIE');
+          }
+        });
+      });
+    </script>
+    <![endif]-->
+
+    <!--[if gte IE 9]><!-->
+    <script type="text/javascript">
+      // Code left intentionally unminimized for your reading pleasure.
+
+      (function() {
+        window.shownFile = 'none';
+
+        var version = '1.6.1';
 
         // If an error happens I want to know about it!
         window.onerror = function(msg, url, ln) {
@@ -202,18 +264,6 @@
         }
       })();
     </script>
-    <script type="text/javascript">
-
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', 'UA-17409200-2']);
-      _gaq.push(['_trackPageview']);
-
-      (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
-
-    </script>
+    <!--<![endif]-->
   </body>
 </html>

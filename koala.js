@@ -22,7 +22,7 @@
 */
 
 var koala = {
-  version: '1.5.2'
+  version: '1.6.1'
 };
 
 koala.supportsCanvas = function() {
@@ -172,7 +172,7 @@ koala.supportsSVG = function() {
           .attr('cx',   function(d) { return d.x; })
           .attr('cy',   function(d) { return d.y; })
           .attr('r', 4)
-          .attr('fill', 'rgb(255,255,255)')
+          .attr('fill', '#ffffff')
             .transition()
             .duration(1000);
       } else {
@@ -181,7 +181,7 @@ koala.supportsSVG = function() {
           .attr('cx',   function(d) { d = d.parent; return d.x; })
           .attr('cy',   function(d) { d = d.parent; return d.y; })
           .attr('r',    function(d) { d = d.parent; return d.r; })
-          .attr('fill', function(d) { d = d.parent; return d.rgb; })
+          .attr('fill', function(d) { d = d.parent; return String(d.rgb); })
           .attr('fill-opacity', 0.68)
             .transition()
             .duration(300);
@@ -192,7 +192,7 @@ koala.supportsSVG = function() {
         .attr('cx',   function(d) { return d.x; })
         .attr('cy',   function(d) { return d.y; })
         .attr('r',    function(d) { return d.r; })
-        .attr('fill', function(d) { return d.rgb; })
+        .attr('fill', function(d) { return String(d.rgb); })
         .attr('fill-opacity', 1)
         .each('end',  function(d) {
             d.node = this;
