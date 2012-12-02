@@ -162,6 +162,7 @@
           window.onerror = function() {};
         };
 
+        // First, make sure we can run.
         if (!koala.supportsCanvas()) {
           track('NoCanvas', window.navigator.userAgent);
           alert("Sorry, KoalsToTheMax needs HTML5 Canvas support which your browser does not have. Supported browsers include Chrome, Safari, Firefox, Opera, and Internet Explorer 9, 10");
@@ -174,13 +175,17 @@
           return;
         }
 
+        // This is strange, track it if it happens.
         if (!window.d3) {
           track('NoD3', window.navigator.userAgent);
           alert("Some how D3 was not loaded so the site can not start. This is bad... We are investigating. Try refreshing the page and see if that helps.");
           return;
         }
 
+        // Try you must. If there is an error report it to me.
         try {
+          // btoa and atob do not handle utf-8 as I have discovered the hard way so they need to babied
+          // See: https://developer.mozilla.org/en-US/docs/DOM/window.btoa#Unicode_Strings
           function utf8_to_b64(str) {
             return window.btoa(unescape(encodeURIComponent(str)));
           }
@@ -189,22 +194,113 @@
             return decodeURIComponent(escape(window.atob(str)));
           }
 
-          var hrefSplit = window.location.href.split("?", 2);
-          var domian = hrefSplit[0];
-          var file = hrefSplit[1];
+          // Handle the custom images 'API'
+          // Supported URLs are:
+          // 1. DOMAIN
+          //   The just the page domain / loads one of the default files
+          //
+          // 2. DOMAIN?BA5E64==
+          //   Where BA5E64== is a UTF-8 base64 encoded string of one of the following things:
+          //   a. An image URL
+          //      Example: http://i.imgur.com/cz1Jb.jpg
+          //      Use that URL image instead of the default one.
+          //
+          //   b. A JSON string representing an array of URLs
+          //      Example: ["http://i.imgur.com/cz1Jb.jpg","http://i.imgur.com/Q5IqH.jpg"]
+          //      Pick one of the images at random and use that instead of the default one.
+          //
+          //   c. A JSON string representing an object with the keys 'images', 'background' and 'hideNote'
+          //      Example: {"background":"#000","images":["http://i.imgur.com/cz1Jb.jpg","http://i.imgur.com/Q5IqH.jpg"]}
+          //      images (required): Pick one of the images at random and use that instead of the default one.
+          //      background (optional): Use the value of background as the page background.
+          //      hideNote (optional): Hide the mention on the bottom.
+          //
+          // 3. DOMAIN?image_url
+          //   Where image URL is an actual image URL this is for backwards compatibility.
+          //   Example: http://i.imgur.com/cz1Jb.jpg
+          //   This is how putting in a custom image used to work.
+          //
+          // 4. DOMAIN#a_string
+          //   This will redirect to DOMAIN?b64(a_string)
+          //   This should be used to construct things as above.
+          //
+          // Note: where DOMAIN is usually http://koalastothemax.com
 
-          if (file) {
-            if (file.match(/^[a-z0-9+\/=]+$/i)) {
-              file = b64_to_utf8(file);
-            } else {
-              // Hide the link in the url
-              window.location.href = domian + '?' + utf8_to_b64(file);
+          function goToHidden(string) {
+            location.href = '//' + location.host + location.pathname + '?' + utf8_to_b64(string);
+          }
+
+          // Firstly check if there is a hash, and redirect if so
+          var href = location.href;
+          var idx, rest;
+
+          // Case 4
+          idx = href.indexOf('#');
+          if (idx != -1) {
+            rest = href.substr(idx + 1);
+            goToHidden(rest);
+            return;
+          }
+
+          // Or if the hash changes midway in the page
+          window.onhashchange = function() {
+            var href = location.href;
+            var idx, rest;
+
+            // Case 4'
+            idx = href.indexOf('#');
+            if (idx != -1) {
+              rest = href.substr(idx + 1);
+              goToHidden(rest);
+              return;
             }
-            shownFile = 'CUSTOM';
-          } else {
+          }
+
+          var file;
+
+          idx = href.indexOf('?');
+          if (idx == -1) {
+            // Case 1
             var possible = ['dog', 'kitten', 'koalas', 'lion', 'otter', 'owls', 'pandas'];
             shownFile = possible[Math.floor(Math.random() * possible.length)];
             file = 'img/' + shownFile + '.jpg';
+          } else {
+            rest = href.substr(idx + 1);
+            if (rest.match(/^[a-z0-9+\/]+=*$/i)) {
+              // Case 2
+              rest = b64_to_utf8(rest);
+              if (rest[0] != '[' && rest[0] != '{') {
+                // Case 2a
+                file = rest;
+              } else {
+                try {
+                  var rest = JSON.parse(rest);
+                  if (Array.isArray(rest)) {
+                    // Case 2b
+                    file = rest[Math.floor(Math.random() * rest.length)] || '';
+                  } else if (Array.isArray(rest.images)) {
+                    // Case 2c
+                    if (rest.background) {
+                      d3.select(document.body)
+                        .style('background', rest.background);
+                    }
+                    if (rest.hideNote) {
+                      d3.select('#footer')
+                        .style('display', 'none');
+                    }
+                    rest = rest.images || [];
+                    file = rest[Math.floor(Math.random() * rest.length)] || '';
+                  }
+                } catch (e) {
+                  file = '';
+                }
+              }
+            } else {
+              // Assume case 3
+              goToHidden(rest);
+              return;
+            }
+            shownFile = 'CUSTOM';
           }
 
           if (file.match(/^http:/)) {
@@ -228,7 +324,7 @@
                       d3.select('#next div.msg').text('Thinking...');
                       d3.select(this).style('display', 'none');
                       setTimeout(function() {
-                        window.location.href = domian + '?' + utf8_to_b64(input);
+                        goToHidden(input);
                       }, 750);
                     } else {
                       d3.select('#next').selectAll('div.err').data([0])
