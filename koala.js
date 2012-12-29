@@ -22,7 +22,7 @@
 */
 
 var koala = {
-  version: '1.7.0'
+  version: '1.7.1'
 };
 
 (function() {
@@ -79,7 +79,7 @@ var koala = {
     if (!this.isSplitable()) return;
     d3.select(this.node).remove();
     delete this.node;
-    Circle.addToViz(this.children);
+    Circle.addToVis(this.vis, this.children);
     this.onSplit(this);
   }
 
@@ -96,7 +96,7 @@ var koala = {
     return edx*edx + edy*edy <= r2 && sdx*sdx + sdy*sdy > r2;
   }
 
-  Circle.addToViz = function(circles, init) {
+  Circle.addToVis = function(vis, circles, init) {
     var circle = vis.selectAll('.nope').data(circles)
       .enter().append('circle');
 
@@ -149,12 +149,13 @@ var koala = {
     var splitableByLayer = [],
         splitableTotal = 0,
         nextPercent = 0;
+
     function onSplit(circle) {
       // manage events
-      var l = circle.layer;
-      splitableByLayer[l]--;
-      if (splitableByLayer[l] === 0) {
-        onEvent('LayerClear', l);
+      var layer = circle.layer;
+      splitableByLayer[layer]--;
+      if (splitableByLayer[layer] === 0) {
+        onEvent('LayerClear', layer);
       }
 
       var percent = 1 - d3.sum(splitableByLayer) / splitableTotal;
@@ -162,6 +163,18 @@ var koala = {
         onEvent('PercentClear', Math.round(nextPercent * 100));
         nextPercent += 0.05;
       }
+    }
+
+    // Make sure that the svg exists and is empty
+    if (!vis) {
+      // Create the SVG ellement
+      vis = d3.select("div#dots")
+        .append("svg")
+          .attr("width", maxSize)
+          .attr("height", maxSize);
+    } else {
+      vis.selectAll('circle')
+        .remove();
     }
 
     // Got the data now build the tree
@@ -203,20 +216,8 @@ var koala = {
       prevLayer = layer;
     }
 
-    // Make sure that the svg exists and is empty
-    if (!vis) {
-      // Create the SVG ellement
-      vis = d3.select("div#dots")
-        .append("svg")
-          .attr("width", maxSize)
-          .attr("height", maxSize);
-    } else {
-      vis.selectAll('circle')
-        .remove();
-    }
-
     // Create the initial circle
-    Circle.addToViz([layer(0, 0)], true);
+    Circle.addToVis(vis, [layer(0, 0)], true);
 
     // Interaction helper functions
     function splitableCircleAt(pos) {
@@ -273,7 +274,6 @@ var koala = {
       var mousePosition = d3.mouse(vis.node());
 
       // Do nothing if the mouse point is not valid
-      // TODO: make sure it does not circle the screen
       if (isNaN(mousePosition[0])) {
         prevMousePosition = null;
         return;
