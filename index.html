@@ -10,13 +10,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="google" content="notranslate">
     <title>Koalas to the Max dot Com</title>
-    <script type="text/javascript" src="polyfill/polyfill.js?1.6.1"></script>
+    <script type="text/javascript" src="polyfill/polyfill.js?1.7.0"></script>
     <!--[if gte IE 9]><!-->
-    <script type="text/javascript" src="d3.v2.min.js?1.6.1"></script>
-    <script type="text/javascript" src="d3.mouse.patch.js?1.6.1"></script>
-    <script type="text/javascript" src="koala.js?1.6.1"></script>
+    <script type="text/javascript" src="d3.v2.min.js?1.7.0"></script>
+    <script type="text/javascript" src="d3.mouse.patch.js?1.7.0"></script>
+    <script type="text/javascript" src="koala.js?1.7.0"></script>
     <!--<![endif]-->
-    <link rel="stylesheet" type="text/css" href="koala.css?1.6.1"/>
+    <link rel="stylesheet" type="text/css" href="koala.css?1.7.0"/>
   </head>
   <body>
     <div id="center">
@@ -45,28 +45,6 @@
       Powered by
       <a href="http://d3js.org/">D3</a>
     </div>
-
-    <script type="text/javascript">
-    // FlexTrack
-    (function() {
-      try {
-        var num = 0;
-        var initTime = +new Date();
-        window.flextrack = function(a) {
-          if (Object.prototype.toString.call(a) != '[object Object]') return false;
-          a.N_ = num++;
-          a.P_ = document.location.pathname;
-          a.S_ = +new Date() - initTime;
-          a.R_ = document.referrer || 'Direct';
-          var params = [];
-          for (var k in a) params.push(encodeURIComponent(k) + "=" + encodeURIComponent(String(a[k])));
-          var i = new Image();
-          i.src = 'http://tracking.metamx.com/m.gif?' + params.join('&');
-          return true;
-        };
-      } catch (e) {}
-    })();
-    </script>
 
     <script type="text/javascript">
 
@@ -102,11 +80,11 @@
       })();
 
       function track(type, subtype) {
-        flextrack({
-          Type: type,
-          SybType: subtype,
-          File: shownFile
-        });
+        // flextrack({
+        //   Type: type,
+        //   SybType: subtype,
+        //   File: shownFile
+        // });
         gaTrack(type, subtype);
       }
     </script>
