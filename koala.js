@@ -22,13 +22,14 @@
 */
 
 var koala = {
-  version: '1.7.1'
+  version: '1.7.4'
 };
 
 (function() {
   function array2d(w, h) {
     var a = [];
     return function(x, y, v) {
+      if (x < 0 || y < 0) return void 0;
       if (arguments.length === 3) {
         // set
         return a[w * x + y] = v;
@@ -93,7 +94,7 @@ var koala = {
     r2 = r2 * r2; // Radius squared
 
     // End point is inside the circle and start point is outside
-    return edx*edx + edy*edy <= r2 && sdx*sdx + sdy*sdy > r2;
+    return edx * edx + edy * edy <= r2 && sdx * sdx + sdy * sdy > r2;
   }
 
   Circle.addToVis = function(vis, circles, init) {
@@ -112,10 +113,10 @@ var koala = {
     } else {
       // Setup the initial state of the opened circles
       circle = circle
-        .attr('cx',   function(d) { d = d.parent; return d.x; })
-        .attr('cy',   function(d) { d = d.parent; return d.y; })
-        .attr('r',    function(d) { d = d.parent; return d.size / 2; })
-        .attr('fill', function(d) { d = d.parent; return String(d.rgb); })
+        .attr('cx',   function(d) { return d.parent.x; })
+        .attr('cy',   function(d) { return d.parent.y; })
+        .attr('r',    function(d) { return d.parent.size / 2; })
+        .attr('fill', function(d) { return String(d.parent.rgb); })
         .attr('fill-opacity', 0.68)
           .transition()
           .duration(300);
@@ -131,15 +132,20 @@ var koala = {
       .each('end',  function(d) { d.node = this; });
   }
 
+  // Main code
   var vis,
       maxSize = 512,
       minSize = 4,
       dim = maxSize / minSize;
 
   koala.loadImage = function(imageData) {
-    // Create an HTML5 canvas
+    // Create a canvas for image data resizing and extraction
     var canvas = document.createElement('canvas').getContext('2d');
+    // Draw the image into the corner, resizing it to dim x dim
     canvas.drawImage(imageData, 0, 0, dim, dim);
+    // Extract the pixel data from the same area of canvas
+    // Note: This call will throw a security exception if imageData
+    // was loaded from a different domain than the script.
     return canvas.getImageData(0, 0, dim, dim).data;
   };
 
@@ -165,7 +171,7 @@ var koala = {
       }
     }
 
-    // Make sure that the svg exists and is empty
+    // Make sure that the SVG exists and is empty
     if (!vis) {
       // Create the SVG ellement
       vis = d3.select("div#dots")
@@ -178,22 +184,21 @@ var koala = {
     }
 
     // Got the data now build the tree
-    var baseLayer = array2d(dim, dim);
-    var layer;
+    var finestLayer = array2d(dim, dim);
     var size = minSize;
 
-    // Start of by populating the leaf layer
+    // Start off by populating the base (leaf) layer
     var xi, yi, t = 0, color;
     for (yi = 0; yi < dim; yi++) {
       for (xi = 0; xi < dim; xi++) {
         color = [colorData[t], colorData[t+1], colorData[t+2]];
-        baseLayer(xi, yi, new Circle(vis, xi, yi, size, color));
+        finestLayer(xi, yi, new Circle(vis, xi, yi, size, color));
         t += 4;
       }
     }
 
     // Build up successive nodes by grouping
-    var prevLayer = baseLayer;
+    var layer, prevLayer = finestLayer;
     var c1, c2, c3, c4, currentLayer = 0;
     while (size < maxSize) {
       dim /= 2;
@@ -206,8 +211,9 @@ var koala = {
           c3 = prevLayer(2 * xi    , 2 * yi + 1);
           c4 = prevLayer(2 * xi + 1, 2 * yi + 1);
           color = avgColor(c1.color, c2.color, c3.color, c4.color);
-          c1.parent = c2.parent = c3.parent = c4.parent =
-              layer(xi, yi, new Circle(vis, xi, yi, size, color, [c1, c2, c3, c4], currentLayer, onSplit));
+          c1.parent = c2.parent = c3.parent = c4.parent = layer(xi, yi,
+            new Circle(vis, xi, yi, size, color, [c1, c2, c3, c4], currentLayer, onSplit)
+          );
         }
       }
       splitableByLayer.push(dim * dim);
@@ -223,7 +229,7 @@ var koala = {
     function splitableCircleAt(pos) {
       var xi = Math.floor(pos[0] / minSize),
           yi = Math.floor(pos[1] / minSize),
-          circle = baseLayer(xi, yi);
+          circle = finestLayer(xi, yi);
       if (!circle) return null;
       while (circle && !circle.isSplitable()) circle = circle.parent;
       return circle || null;
@@ -260,17 +266,15 @@ var koala = {
             ep = breaks[i+1];
 
         var circle = splitableCircleAt(ep);
-        if (circle && circle.children && circle.checkIntersection(sp, ep)) {
+        if (circle && circle.isSplitable() && circle.checkIntersection(sp, ep)) {
           circle.split();
         }
       }
     }
 
-    // Initialize interaction
-    var d3Body = d3.select(document.body);
-
+    // Handle mouse events
     var prevMousePosition = null;
-    d3Body.on('mousemove.koala', function() {
+    function onMouseMove() {
       var mousePosition = d3.mouse(vis.node());
 
       // Do nothing if the mouse point is not valid
@@ -283,10 +287,12 @@ var koala = {
         findAndSplit(prevMousePosition, mousePosition);
       }
       prevMousePosition = mousePosition;
-    });
+      d3.event.preventDefault();
+    }
 
+    // Handle touch events
     var prevTouchPositions = {};
-    d3Body.on('touchmove.koala', function() {
+    function onTouchMove() {
       var touchPositions = d3.touches(vis.node());
       for (var touchIndex = 0; touchIndex < touchPositions.length; touchIndex++) {
         var touchPosition = touchPositions[touchIndex];
@@ -296,6 +302,23 @@ var koala = {
         }
         prevTouchPositions[touchPosition.identifier] = touchPosition;
       }
-    });
+      d3.event.preventDefault();
+    }
+
+    function onTouchEnd() {
+      var touches = d3.event.changedTouches;
+      for (var touchIndex = 0; touchIndex < touches.length; touchIndex++) {
+        var touch = touches.item(touchIndex);
+        prevTouchPositions[touch.identifier] = null;
+      }
+      d3.event.preventDefault();
+    }
+
+    // Initialize interaction
+    d3.select(document.body)
+      .on('mousemove.koala', onMouseMove)
+      .on('touchmove.koala', onTouchMove)
+      .on('touchend.koala', onTouchEnd)
+      .on('touchcancel.koala', onTouchEnd);
   };
 })();
