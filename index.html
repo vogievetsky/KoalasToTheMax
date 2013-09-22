@@ -10,13 +10,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="google" content="notranslate">
     <title>Koalas to the Max dot Com</title>
-    <script type="text/javascript" src="polyfill/polyfill.js?1.7.5"></script>
+    <script type="text/javascript" src="polyfill/polyfill.js?1.8.0"></script>
     <!--[if gte IE 9]><!-->
-    <script type="text/javascript" src="d3.v2.min.js?1.7.5"></script>
-    <script type="text/javascript" src="d3.mouse.patch.js?1.7.5"></script>
-    <script type="text/javascript" src="koala.js?1.7.5"></script>
+    <script type="text/javascript" src="d3.v2.min.js?1.8.0"></script>
+    <script type="text/javascript" src="d3.mouse.patch.js?1.8.0"></script>
+    <script type="text/javascript" src="koala.js?1.8.0"></script>
     <!--<![endif]-->
-    <link rel="stylesheet" type="text/css" href="koala.css?1.7.5"/>
+    <link rel="stylesheet" type="text/css" href="koala.css?1.8.0"/>
   </head>
   <body>
     <div id="center">
@@ -74,7 +74,7 @@
 
           a.S = session;
           a.N = num++;
-          a.P = document.location.pathname;
+          a.P = document.location.href;
           a.L = +new Date() - initTime;
           a.F = w.document.referrer || 'Direct';
           a.C = screen.width + 'x' + screen.height;
@@ -168,7 +168,7 @@
       (function() {
         window.shownFile = 'none';
 
-        var version = '1.7.5';
+        var version = '1.8.0';
 
         // If an error happens I want to know about it!
         window.onerror = function(msg, url, ln) {
