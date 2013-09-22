@@ -61,6 +61,46 @@
     </script>
 
     <script type="text/javascript">
+
+    (function(w,h) {
+      try {
+        var session = 'S' + (Math.random() * 1e10).toFixed();
+        var num = 0;
+        var now = new Date();
+        var initTime = +now;
+        var tzm = String(now).match(/\\((\\w+)\\)/);
+        w.fastrack = function(a) {
+          if (Object.prototype.toString.call(a) != '[object Object]') return false;
+
+          a.S = session;
+          a.N = num++;
+          a.P = document.location.pathname;
+          a.L = +new Date() - initTime;
+          a.F = w.document.referrer || 'Direct';
+          a.C = screen.width + 'x' + screen.height;
+          a.X = w.scrollX;
+          a.Y = w.scrollY;
+          a.O = now.getTimezoneOffset();
+          a.Z = (tzm && tzm.length === 2) ? tzm[1] : 'N/A';
+
+          if ('innerWidth' in window) {
+            a.W = w.innerWidth + 'x' + w.innerHeight;
+          } else {
+            var e = w.document.documentElement || w.document.body;
+            a.W = w.clientWidth + 'x' + w.clientHeight;
+          }
+          var params = [];
+          for (var k in a) params.push(encodeURIComponent(k) + "=" + encodeURIComponent(String(a[k])));
+          var i = new Image();
+          i.src = 'http://' + h + '/m.gif?' + params.join('&');
+          return true;
+        };
+      }catch(e){}
+    })(window,"fastrack.mmx.io");
+
+    </script>
+
+    <script type="text/javascript">
       window.shownFile = 'none';
 
       (function() {
@@ -80,11 +120,11 @@
       })();
 
       function track(type, subtype) {
-        // flextrack({
-        //   Type: type,
-        //   SybType: subtype,
-        //   File: shownFile
-        // });
+        fastrack({
+          type: type,
+          subtype: subtype,
+          file: shownFile
+        });
         gaTrack(type, subtype);
       }
     </script>
