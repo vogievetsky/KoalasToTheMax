@@ -68,7 +68,7 @@
         var num = 0;
         var now = new Date();
         var initTime = +now;
-        var tzm = String(now).match(/\\((\\w+)\\)/);
+        var tzm = String(now).match(/\((\w+)\)/);
         w.fastrack = function(a) {
           if (Object.prototype.toString.call(a) != '[object Object]') return false;
 
