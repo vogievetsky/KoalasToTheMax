@@ -10,13 +10,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="google" content="notranslate">
     <title>Koalas to the Max dot Com</title>
-    <script type="text/javascript" src="polyfill/polyfill.js?1.8.0"></script>
+    <script type="text/javascript" src="polyfill/polyfill.js?1.8.1"></script>
     <!--[if gte IE 9]><!-->
-    <script type="text/javascript" src="d3.v2.min.js?1.8.0"></script>
-    <script type="text/javascript" src="d3.mouse.patch.js?1.8.0"></script>
-    <script type="text/javascript" src="koala.js?1.8.0"></script>
+    <script type="text/javascript" src="d3.v2.min.js?1.8.1"></script>
+    <script type="text/javascript" src="d3.mouse.patch.js?1.8.1"></script>
+    <script type="text/javascript" src="koala.js?1.8.1"></script>
     <!--<![endif]-->
-    <link rel="stylesheet" type="text/css" href="koala.css?1.8.0"/>
+    <link rel="stylesheet" type="text/css" href="koala.css?1.8.1"/>
   </head>
   <body>
     <div id="center">
@@ -46,6 +46,8 @@
       <a href="http://d3js.org/">D3</a>
     </div>
 
+    <script type="text/javascript">var version = '1.8.1';</script>
+
     <script type="text/javascript">
 
       var _gaq = _gaq || [];
@@ -64,11 +66,13 @@
 
     (function(w,h) {
       try {
-        var session = 'S' + (Math.random() * 1e10).toFixed();
+        var session = 'S' + Math.random().toFixed(8).substring(2);
         var num = 0;
         var now = new Date();
         var initTime = +now;
         var tzm = String(now).match(/\((\w+)\)/);
+        var sx = (window.pageXOffset !== undefined) ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
+        var sy = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
         w.fastrack = function(a) {
           if (Object.prototype.toString.call(a) != '[object Object]') return false;
 
@@ -78,8 +82,7 @@
           a.L = +new Date() - initTime;
           a.F = w.document.referrer || 'Direct';
           a.C = screen.width + 'x' + screen.height;
-          a.X = w.scrollX;
-          a.Y = w.scrollY;
+          a.R = sx + 'x' + sy;
           a.O = now.getTimezoneOffset();
           a.Z = (tzm && tzm.length === 2) ? tzm[1] : 'N/A';
 
@@ -121,11 +124,13 @@
 
       function track(type, subtype) {
         fastrack({
+          version: version,
           type: type,
           subtype: subtype,
-          file: shownFile
+          file: shownFile,
+          group: 'Z'
         });
-        gaTrack(type, subtype);
+        gaTrack(type + '-' + version, subtype);
       }
     </script>
 
@@ -168,15 +173,13 @@
       (function() {
         window.shownFile = 'none';
 
-        var version = '1.8.0';
-
         // If an error happens I want to know about it!
         window.onerror = function(msg, url, ln) {
           msg = msg.toString();
           // In Chrome and Firefox an error on a script form a foreign domain will cause this, see link bellow:
           // http://stackoverflow.com/questions/5913978/cryptic-script-error-reported-in-javascript-in-chrome-and-firefox
           if (msg === 'Script error.' && url === '' && ln === 0) return;
-          track('OnError-' + version, "'" + msg + "' in '" + url + "' @ " + ln + " /u:'" + window.navigator.userAgent + "'");
+          track('OnError', "'" + msg + "' in '" + url + "' @ " + ln + " /u:'" + window.navigator.userAgent + "'");
           // Track only one error per page load
           window.onerror = function() {};
         };
@@ -363,7 +366,7 @@
               colorData = koala.loadImage(this);
             } catch (e) {
               colorData = null;
-              track('BadLoad-' + version, "Msg: '" + e.message + "' file: '" + file + "'");
+              track('BadLoad', "Msg: '" + e.message + "' file: '" + file + "'");
               alert("Sorry, KoalsToTheMax could not load the image '" + file + "'");
               setTimeout(function() {
                 window.location.href = domian;
@@ -371,7 +374,7 @@
             }
             if (colorData) {
               koala.makeCircles(colorData, onEvent);
-              track('GoodLoad-' + version, 'Yay');
+              track('GoodLoad', 'Yay');
             }
           };
           img.src = file;
