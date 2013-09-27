@@ -22,7 +22,7 @@
 */
 
 var koala = {
-  version: '1.7.4'
+  version: '1.8.2'
 };
 
 (function() {
@@ -149,7 +149,7 @@ var koala = {
     return canvas.getImageData(0, 0, dim, dim).data;
   };
 
-  koala.makeCircles = function(colorData, onEvent) {
+  koala.makeCircles = function(selector, colorData, onEvent) {
     onEvent = onEvent || function() {};
 
     var splitableByLayer = [],
@@ -174,7 +174,7 @@ var koala = {
     // Make sure that the SVG exists and is empty
     if (!vis) {
       // Create the SVG ellement
-      vis = d3.select("div#dots")
+      vis = d3.select(selector)
         .append("svg")
           .attr("width", maxSize)
           .attr("height", maxSize);

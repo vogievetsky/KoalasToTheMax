@@ -10,13 +10,16 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="google" content="notranslate">
     <title>Koalas to the Max dot Com</title>
-    <script type="text/javascript" src="polyfill/polyfill.js?1.8.1"></script>
+    <script type="text/javascript">var version = '1.8.2';</script>
+    <script type="text/javascript" src="polyfill/polyfill.js?1.8.2"></script>
+    <script type="text/javascript" src="polyfill/Blob.js?1.8.2"></script>
+    <script type="text/javascript" src="polyfill/FileSaver.js?1.8.2"></script>
     <!--[if gte IE 9]><!-->
-    <script type="text/javascript" src="d3.v2.min.js?1.8.1"></script>
-    <script type="text/javascript" src="d3.mouse.patch.js?1.8.1"></script>
-    <script type="text/javascript" src="koala.js?1.8.1"></script>
+    <script type="text/javascript" src="d3.v2.min.js?1.8.2"></script>
+    <script type="text/javascript" src="d3.mouse.patch.js?1.8.2"></script>
+    <script type="text/javascript" src="koala.js?1.8.2"></script>
     <!--<![endif]-->
-    <link rel="stylesheet" type="text/css" href="koala.css?1.8.1"/>
+    <link rel="stylesheet" type="text/css" href="koala.css?1.8.2"/>
   </head>
   <body>
     <div id="center">
@@ -25,8 +28,7 @@
           Your browser does not support JavaScript or it is disabled.<br>
           JavaScript is needed to view this site.
         </noscript>
-        <div id="dots">
-        </div>
+        <div id="dots"></div>
         <div id="next" style="display: none">
           <div class="msg">
             Awesome stuff! Now make your own and share the link.<br/>
@@ -37,7 +39,7 @@
       </div>
     </div>
     <div id="footer">
-      Made with love by
+      Made with <span id="love">love</span> by
       <a href="http://vadim.ogievetsky.com">Vadim Ogievetsky</a>
       for
       <a href="http://anniealbagli.com">Annie Albagli</a>
@@ -45,8 +47,6 @@
       Powered by
       <a href="http://d3js.org/">D3</a>
     </div>
-
-    <script type="text/javascript">var version = '1.8.1';</script>
 
     <script type="text/javascript">
 
@@ -373,7 +373,7 @@
               }, 750);
             }
             if (colorData) {
-              koala.makeCircles(colorData, onEvent);
+              koala.makeCircles("#dots", colorData, onEvent);
               track('GoodLoad', 'Yay');
             }
           };
@@ -381,6 +381,28 @@
         } catch (e) {
           track('Problemo', String(e.message));
         }
+
+        // Local download functionality
+        var saveNumber = 0;
+        d3.select('#love').on('click', function() {
+          saveNumber++;
+          track('SaveSVG', saveNumber);
+          svgData = d3.select('#dots').html();
+          if (svgData.indexOf('<svg') !== -1) {
+            prefix = [
+              '<?xml version="1.0" encoding="utf-8"?>',
+              '<!-- Generator: KoalasToTheMax.com -->',
+              '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">'
+            ];
+            saveAs(new Blob(
+              [svgData.replace('<svg', prefix.join(' ') + '<svg')],
+              {type: "text/plain;charset=utf-8"}
+            ), "KoalasToTheMax.svg");
+          } else {
+            track('SaveSVG', 'Fail');
+          }
+        });
+
       })();
     </script>
     <!--<![endif]-->
