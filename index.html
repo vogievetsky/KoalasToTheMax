@@ -10,16 +10,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="google" content="notranslate">
     <title>Koalas to the Max dot Com</title>
-    <script type="text/javascript">var version = '1.8.2';</script>
-    <script type="text/javascript" src="polyfill/polyfill.js?1.8.2"></script>
-    <script type="text/javascript" src="polyfill/Blob.js?1.8.2"></script>
-    <script type="text/javascript" src="polyfill/FileSaver.js?1.8.2"></script>
+    <script type="text/javascript">var version = '1.9.0';</script>
+    <script type="text/javascript" src="polyfill/polyfill.js?1.9.0"></script>
+    <script type="text/javascript" src="polyfill/Blob.js?1.9.0"></script>
+    <script type="text/javascript" src="polyfill/FileSaver.js?1.9.0"></script>
     <!--[if gte IE 9]><!-->
-    <script type="text/javascript" src="d3.v2.min.js?1.8.2"></script>
-    <script type="text/javascript" src="d3.mouse.patch.js?1.8.2"></script>
-    <script type="text/javascript" src="koala.js?1.8.2"></script>
+    <script type="text/javascript" src="d3.min.js?1.9.0"></script>
+    <script type="text/javascript" src="koala.js?1.9.0"></script>
     <!--<![endif]-->
-    <link rel="stylesheet" type="text/css" href="koala.css?1.8.2"/>
+    <link rel="stylesheet" type="text/css" href="koala.css?1.9.0"/>
   </head>
   <body>
     <div id="center">
@@ -285,8 +284,8 @@
             // Case 1
             //var possible = ['dog', 'kitten', 'koalas', 'lion', 'otter', 'owls', 'pandas'];
             var possible = ['koalas', 'koalas1', 'koalas2', 'koalas3'];
-            shownFile = possible[Math.floor(Math.random() * possible.length)];
-            file = 'img/' + shownFile + '.jpg';
+            file = 'img/' + possible[Math.floor(Math.random() * possible.length)] + '.jpg';
+            shownFile = 'http://koalastothemax.com/' + file;
           } else {
             rest = href.substr(idx + 1);
             if (rest.match(/^[a-z0-9+\/]+=*$/i)) {
@@ -323,7 +322,7 @@
               goToHidden(rest);
               return;
             }
-            shownFile = 'CUSTOM';
+            shownFile = file;
           }
 
           if (file.match(/^http:/)) {
