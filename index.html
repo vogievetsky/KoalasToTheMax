@@ -10,15 +10,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="google" content="notranslate">
     <title>Koalas to the Max dot Com</title>
-    <script type="text/javascript">var version = '1.9.2';</script>
-    <script type="text/javascript" src="polyfill/polyfill.js?1.9.2"></script>
-    <script type="text/javascript" src="polyfill/Blob.js?1.9.2"></script>
-    <script type="text/javascript" src="polyfill/FileSaver.js?1.9.2"></script>
+    <script type="text/javascript">var version = '1.9.3';</script>
+    <script type="text/javascript" src="polyfill/polyfill.js?1.9.3"></script>
+    <script type="text/javascript" src="polyfill/Blob.js?1.9.3"></script>
+    <script type="text/javascript" src="polyfill/FileSaver.js?1.9.3"></script>
     <!--[if gte IE 9]><!-->
-    <script type="text/javascript" src="d3.min.js?1.9.2"></script>
-    <script type="text/javascript" src="koala.js?1.9.2"></script>
+    <script type="text/javascript" src="d3.min.js?1.9.3"></script>
+    <script type="text/javascript" src="koala.js?1.9.3"></script>
     <!--<![endif]-->
-    <link rel="stylesheet" type="text/css" href="koala.css?1.9.2"/>
+    <link rel="stylesheet" type="text/css" href="koala.css?1.9.3"/>
   </head>
   <body>
     <div id="center">
@@ -248,8 +248,9 @@
 
           function basicLoad(location) {
             var possible = ['koalas', 'koalas1', 'koalas2', 'koalas3'];
+            var file = 'img/' + possible[Math.floor(Math.random() * possible.length)] + '.jpg'
             return {
-              file: 'img/' + possible[Math.floor(Math.random() * possible.length)] + '.jpg',
+              file: file,
               shownFile: location.protocol + '//' + location.host + location.pathname + file
             };
           }
