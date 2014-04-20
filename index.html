@@ -220,8 +220,8 @@
           // 1. DOMAIN
           //   The just the page domain / loads one of the default files
           //
-          // 2. DOMAIN?BA5E64==
-          //   Where BA5E64== is a UTF-8 base64 encoded string of one of the following things:
+          // 2. DOMAIN?BASE64==
+          //   Where BASE64== is a UTF-8 base64 encoded string of one of the following things:
           //   a. An image URL
           //      Example: http://i.imgur.com/cz1Jb.jpg
           //      Use that URL image instead of the default one.
@@ -237,9 +237,8 @@
           //      hideNote (optional): Hide the mention on the bottom.
           //
           // 3. DOMAIN?image_url
-          //   Where image URL is an actual image URL this is for backwards compatibility.
+          //   Where image URL is an actual image URL that will get re-encoded into base64 (2)
           //   Example: http://i.imgur.com/cz1Jb.jpg
-          //   This is how putting in a custom image used to work.
           //
           // Note: where DOMAIN is usually http://koalastothemax.com
           function goToHidden(location, string) {
