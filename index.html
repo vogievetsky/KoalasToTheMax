@@ -10,15 +10,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="google" content="notranslate">
     <title>Koalas to the Max dot Com</title>
-    <script type="text/javascript">var version = '1.9.0';</script>
-    <script type="text/javascript" src="polyfill/polyfill.js?1.9.0"></script>
-    <script type="text/javascript" src="polyfill/Blob.js?1.9.0"></script>
-    <script type="text/javascript" src="polyfill/FileSaver.js?1.9.0"></script>
+    <script type="text/javascript">var version = '1.9.2';</script>
+    <script type="text/javascript" src="polyfill/polyfill.js?1.9.2"></script>
+    <script type="text/javascript" src="polyfill/Blob.js?1.9.2"></script>
+    <script type="text/javascript" src="polyfill/FileSaver.js?1.9.2"></script>
     <!--[if gte IE 9]><!-->
-    <script type="text/javascript" src="d3.min.js?1.9.0"></script>
-    <script type="text/javascript" src="koala.js?1.9.0"></script>
+    <script type="text/javascript" src="d3.min.js?1.9.2"></script>
+    <script type="text/javascript" src="koala.js?1.9.2"></script>
     <!--<![endif]-->
-    <link rel="stylesheet" type="text/css" href="koala.css?1.9.0"/>
+    <link rel="stylesheet" type="text/css" href="koala.css?1.9.2"/>
   </head>
   <body>
     <div id="center">
@@ -241,91 +241,92 @@
           //   Example: http://i.imgur.com/cz1Jb.jpg
           //   This is how putting in a custom image used to work.
           //
-          // 4. DOMAIN#a_string
-          //   This will redirect to DOMAIN?b64(a_string)
-          //   This should be used to construct things as above.
-          //
           // Note: where DOMAIN is usually http://koalastothemax.com
-
-          function goToHidden(string) {
+          function goToHidden(location, string) {
             location.href = '//' + location.host + location.pathname + '?' + utf8_to_b64(string);
           }
 
-          // Firstly check if there is a hash, and redirect if so
-          var href = location.href;
-          var idx, rest;
-
-          // Case 4
-          idx = href.indexOf('#');
-          if (idx != -1) {
-            rest = href.substr(idx + 1);
-            goToHidden(rest);
-            return;
-          }
-
-          // Or if the hash changes midway in the page
-          window.onhashchange = function() {
-            var href = location.href;
-            var idx, rest;
-
-            // Case 4'
-            idx = href.indexOf('#');
-            if (idx != -1) {
-              rest = href.substr(idx + 1);
-              goToHidden(rest);
-              return;
-            }
-          }
-
-          var file;
-
-          idx = href.indexOf('?');
-          if (idx === -1 || idx === href.length - 1) {
-            // Case 1
-            //var possible = ['dog', 'kitten', 'koalas', 'lion', 'otter', 'owls', 'pandas'];
+          function basicLoad(location) {
             var possible = ['koalas', 'koalas1', 'koalas2', 'koalas3'];
-            file = 'img/' + possible[Math.floor(Math.random() * possible.length)] + '.jpg';
-            shownFile = 'http://koalastothemax.com/' + file;
-          } else {
-            rest = href.substr(idx + 1);
-            if (rest.match(/^[a-z0-9+\/]+=*$/i)) {
-              // Case 2
-              rest = b64_to_utf8(rest);
-              if (rest[0] != '[' && rest[0] != '{') {
-                // Case 2a
-                file = rest;
-              } else {
-                try {
-                  var rest = JSON.parse(rest);
-                  if (Array.isArray(rest)) {
-                    // Case 2b
-                    file = rest[Math.floor(Math.random() * rest.length)] || '';
-                  } else if (Array.isArray(rest.images)) {
-                    // Case 2c
-                    if (rest.background) {
-                      d3.select(document.body)
-                        .style('background', rest.background);
-                    }
-                    if (rest.hideNote) {
-                      d3.select('#footer')
-                        .style('display', 'none');
-                    }
-                    rest = rest.images || [];
-                    file = rest[Math.floor(Math.random() * rest.length)] || '';
-                  }
-                } catch (e) {
-                  file = '';
-                }
-              }
-            } else {
-              // Assume case 3
-              goToHidden(rest);
-              return;
-            }
-            shownFile = file;
+            return {
+              file: 'img/' + possible[Math.floor(Math.random() * possible.length)] + '.jpg',
+              shownFile: location.protocol + '//' + location.host + location.pathname + file
+            };
           }
 
-          if (file.match(/^http:/)) {
+          function parseUrl(location) {
+            var href = location.href;
+            var idx, param, file;
+
+            idx = href.indexOf('?');
+            if (idx === -1 || idx === href.length - 1) {
+              return basicLoad(location); // Case 1
+            }
+
+            param = href.substr(idx + 1);
+            if (!/^[a-z0-9+\/]+=*$/i.test(param)) {
+              // Does not look base64
+              goToHidden(location, param);
+              return null;
+            }
+
+            // Case 2
+            try {
+              param = b64_to_utf8(param);
+            } catch (e) {
+              return basicLoad(location); // Invalid base64, do a basic load
+            }
+
+            try {
+              param = JSON.parse(param);
+            } catch (e) {
+              // Case 2a
+              return {
+                file: param,
+                shownFile: param
+              };
+            }
+
+            // At this point param is a JS object
+            if (Array.isArray(param) && param.length) {
+              // Case 2b
+              file = param[Math.floor(Math.random() * param.length)];
+              return {
+                file: file,
+                shownFile: file
+              };
+            }
+
+            if (Array.isArray(param.images) && param.images.length) {
+              // Case 2c
+              file = param.images[Math.floor(Math.random() * param.images.length)];
+              return {
+                file: file,
+                shownFile: file,
+                background: param.background,
+                hideNote: param.hideNote
+              };
+            }
+
+            // Fall though
+            return basicLoad(location);
+          }
+
+          var parse = parseUrl(location);
+          if (!parse) return;
+          var file = parse.file;
+          window.shownFile = parse.shownFile;
+
+          if (parse.background) {
+            d3.select(document.body)
+              .style('background', param.background);
+          }
+          if (parse.hideNote) {
+            d3.select('#footer')
+              .style('display', 'none');
+          }
+
+          if (/^https?:/.test(file)) {
             file = "image-server.php?url=" + file;
           }
 
@@ -346,7 +347,7 @@
                       d3.select('#next div.msg').text('Thinking...');
                       d3.select(this).style('display', 'none');
                       setTimeout(function() {
-                        goToHidden(input);
+                        goToHidden(location, input);
                       }, 750);
                     } else {
                       d3.select('#next').selectAll('div.err').data([0])
