@@ -81,3 +81,8 @@ circle {
   background: -moz-linear-gradient(bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
 }
 
+div.not-found {
+  text-align: center;
+  margin-top: 200px;
+  font-size: 32px;
+}

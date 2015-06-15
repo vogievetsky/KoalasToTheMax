@@ -63,7 +63,11 @@
 
     <script type="text/javascript">
 
+    var _fastrack_account = 'FT-1000001';
+
     (function(w,h) {
+      if (typeof _fastrack_account !== 'string') return;
+      var acc = _fastrack_account;
       try {
         var session = 'S' + Math.random().toFixed(8).substring(2);
         var num = 0;
@@ -72,18 +76,29 @@
         var tzm = String(now).match(/\((\w+)\)/);
         var sx = (window.pageXOffset !== undefined) ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
         var sy = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
-        w.fastrack = function(a) {
-          if (Object.prototype.toString.call(a) != '[object Object]') return false;
+        w.fastrack = function(opt) {
+          var a = {
+            A: acc,
+            S: session,
+            N: num++,
+            P: document.location.href,
+            L: +new Date() - initTime,
+            F: w.document.referrer || 'Direct',
+            C: screen.width + 'x' + screen.height,
+            R: sx + 'x' + sy,
+            O: now.getTimezoneOffset(),
+            Z: (tzm && tzm.length === 2) ? tzm[1] : 'N/A'
+          }
 
-          a.S = session;
-          a.N = num++;
-          a.P = document.location.href;
-          a.L = +new Date() - initTime;
-          a.F = w.document.referrer || 'Direct';
-          a.C = screen.width + 'x' + screen.height;
-          a.R = sx + 'x' + sy;
-          a.O = now.getTimezoneOffset();
-          a.Z = (tzm && tzm.length === 2) ? tzm[1] : 'N/A';
+          if (opt) {
+            var s;
+            for (var j = 1; j <= 6; j++) {
+              s = 'D0' + j;
+              if (opt[s]) { a['D0' + j] = opt['D0' + j]; }
+              s = 'M0' + j;
+              if (opt[s]) { a['M0' + j] = opt['M0' + j]; }
+            }
+          }
 
           if ('innerWidth' in window) {
             a.W = w.innerWidth + 'x' + w.innerHeight;
@@ -94,11 +109,11 @@
           var params = [];
           for (var k in a) params.push(encodeURIComponent(k) + "=" + encodeURIComponent(String(a[k])));
           var i = new Image();
-          i.src = 'http://' + h + '/m.gif?' + params.join('&');
+          i.src = h + '?' + params.join('&');
           return true;
         };
       }catch(e){}
-    })(window,"fastrack.mmx.io");
+    })(window,"https://rt.metamarkets.com/i1/m.gif");
 
     </script>
 
@@ -122,13 +137,15 @@
       })();
 
       function track(type, subtype) {
+        /*
         fastrack({
-          version: version,
-          type: type,
-          subtype: subtype,
-          file: shownFile,
-          group: 'Z'
+          D01: version,
+          D02: type,
+          D03: subtype,
+          D04: shownFile,
+          M01: 3 // tmp
         });
+        */
         gaTrack(type + '-' + version, subtype);
       }
     </script>
